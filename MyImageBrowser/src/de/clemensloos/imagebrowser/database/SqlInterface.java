@@ -2,7 +2,6 @@ package de.clemensloos.imagebrowser.database;
 
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.clemensloos.imagebrowser.types.Date;
 import de.clemensloos.imagebrowser.types.Image;
 
 
@@ -20,7 +20,7 @@ public abstract class SqlInterface {
 	protected Statement statement;
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("y-MM-d k:m:s");
-	private static SimpleDateFormat sdf_day = new SimpleDateFormat("y-MM-d");
+	private static SimpleDateFormat sdf_day = new SimpleDateFormat("y-MM-dd");
 	
 
 	public SqlInterface() {
@@ -64,7 +64,6 @@ public abstract class SqlInterface {
 	public void addImageDate(Image image) throws SQLException {
 		
 		String day = sdf_day.format(image.imagedate);
-		System.out.println(day);
 		ResultSet rs = statement.executeQuery("SELECT num_images FROM days WHERE day = '"+day+"' LIMIT 1;");
 		if(rs.next()) {
 			int i = rs.getInt("num_images") + 1;
@@ -73,7 +72,6 @@ public abstract class SqlInterface {
 		else {
 			statement.execute("INSERT INTO days VALUES ('"+day+"', 1);");
 		}
-		
 	}
 	
 	
@@ -93,6 +91,19 @@ public abstract class SqlInterface {
 		}
 		
 		return images;
+	}
+	
+	
+	public List<Date> getDates() throws SQLException{
+		
+		ResultSet rs = statement.executeQuery("SELECT * FROM days ORDER BY day ASC");
+		List<Date> dates = new ArrayList<Date>();
+		while (rs.next()) {
+			String date = rs.getString("day");
+			int numImages = rs.getInt("num_images");
+			dates.add(new Date(date, numImages));
+		}
+		return dates;	
 	}
 	
 	

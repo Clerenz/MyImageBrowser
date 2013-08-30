@@ -23,8 +23,6 @@ public class SqliteImpl extends SqlInterface {
 		Class.forName(driver);
 		
 		String url = urlPrefix + projectPath + "\\" + projectName;
-//		String user = "sa";
-//		String pass = "";
 		connection = DriverManager.getConnection(url);
 		
 		statement = connection.createStatement();

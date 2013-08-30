@@ -14,6 +14,7 @@ import com.drew.imaging.ImageProcessingException;
 import de.clemensloos.imagebrowser.database.SqlInterface;
 import de.clemensloos.imagebrowser.database.SqliteImpl;
 import de.clemensloos.imagebrowser.gui.ImageBrowserGui;
+import de.clemensloos.imagebrowser.types.Date;
 import de.clemensloos.imagebrowser.types.Image;
 
 
@@ -67,7 +68,17 @@ public class ImageBrowser {
 			log.error(e.getMessage(), e);
 			return null;
 		}
+	}
+	
+	
+	public List<Date> getDates() {
 		
+		try {
+			return sqlInterface.getDates();
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
 	}
 	
 	

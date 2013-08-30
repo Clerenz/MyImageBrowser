@@ -28,7 +28,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.debug.FormDebugPanel;
@@ -36,6 +35,8 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
+import de.clemensloos.imagebrowser.types.Date;
+import de.clemensloos.imagebrowser.types.DateTreeHelper;
 import de.clemensloos.imagebrowser.types.Event;
 import de.clemensloos.imagebrowser.types.Group;
 import de.clemensloos.imagebrowser.types.Image;
@@ -51,7 +52,6 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	public static void main(String[] args) {
 
 		try {
-			// UIManager.setLookAndFeel(com.jgoodies.looks.plastic.Plastic3DLookAndFeel.class.getCanonicalName());
 			UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -68,7 +68,6 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		}
 
 		SwingUtilities.invokeLater(new Runnable() {
-			@SuppressWarnings("unused")
 			@Override
 			public void run() {
 				new ImageBrowser2DGui();
@@ -90,18 +89,27 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		// log("Let's sort some pictures...");
 
 		imageBrowser = new ImageBrowser(this);
+		
+		buildEventTree();
+		buildDateTree();
 
-//		 File f = new File("C:\\Users\\clemens.loos\\Desktop\\tmp\\Beispiel Bilder\\a.jpg");
-//		 imageBrowser.addImage(f);
+//		String[] imgs = new String[] {
+//				"_MG_0417.jpg",
+//				"_MG_5356.jpg",
+//				"_MG_5444.jpg",
+//				"_MG_5787.jpg",
+//				"_MG_5862.jpg",
+//				"_MG_6006.jpg",
+//				"_MG_9200.jpg",
+//				"_MG_9334.jpg",
+//				"_MG_9412.jpg",
+//				"_MG_9674.jpg",
+//				};
 //		
-//		 f = new File("C:\\Users\\clemens.loos\\Desktop\\tmp\\Beispiel Bilder\\b.jpg");
-//		 imageBrowser.addImage(f);
-//		
-//		 f = new File("C:\\Users\\clemens.loos\\Desktop\\tmp\\Beispiel Bilder\\c.jpg");
-//		 imageBrowser.addImage(f);
-//		
-//		 f = new File("C:\\Users\\clemens.loos\\Desktop\\tmp\\Beispiel Bilder\\d.jpg");
-//		 imageBrowser.addImage(f);
+//		for(String s : imgs) {
+//			File f = new File("C:\\Dokumente und Einstellungen\\Clemens\\Eigene Dateien\\Fotos\\120000 Fotobuch\\" + s);
+//			imageBrowser.addImage(f);			
+//		}
 
 		List<Image> images = imageBrowser.getImages();
 		if (images != null) {
@@ -141,13 +149,14 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	
 	JScrollPane eventScrollPane;
 	JTree eventTree;
+	DefaultTreeModel eventTreeModel;
 	DefaultMutableTreeNode eventRootNode;
 	
 	JScrollPane dateScrollPane;
+	JTree dateTree;
+	DefaultTreeModel dateTreeModel;
+	DateTreeHelper dateRootNode;
 	
-	
-	JLabel leftComponent;
-	JLabel leftComponent2;
 
 	JSplitPane splitPaneVerti;
 	JSplitPane splitPaneHoriz;
@@ -253,17 +262,18 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		// BUILD LEFT AREA ===================================================
 		
 		eventRootNode = new DefaultMutableTreeNode("Events");
-		buildEventTree();
-		TreeModel treeModel = new DefaultTreeModel(eventRootNode, true);
-		eventTree = new JTree(treeModel);
+		eventTreeModel = new DefaultTreeModel(eventRootNode, true);
+		eventTree = new JTree(eventTreeModel);
 		eventScrollPane = new JScrollPane(eventTree);
 		
-		leftComponent = new JLabel("left component");
-		leftComponent2 = new JLabel("left component 2");
+		dateRootNode = new DateTreeHelper("Dates");
+		dateTreeModel = new DefaultTreeModel(dateRootNode, true);
+		dateTree = new JTree(dateTreeModel);
+		dateScrollPane = new JScrollPane(dateTree);
 
 		leftTabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
 		leftTabbedPane.addTab("Events", eventScrollPane);
-		leftTabbedPane.addTab("Datum", leftComponent2);
+		leftTabbedPane.addTab("Datum", dateScrollPane);
 
 		hideLeftPanel = new JLabel(" < ");
 		hideLeftPanel.addMouseListener(new MouseAdapter() {
@@ -356,6 +366,20 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		
 		eventRootNode.add(node2013);
 		eventRootNode.add(node2014);
+		
+		eventTreeModel.reload();
+	}
+	
+	
+	public void buildDateTree() {
+		
+		List<Date> dates = imageBrowser.getDates();
+		for(Date d : dates) {
+			dateRootNode.add(d);
+		}
+		
+		dateTreeModel.reload();
+		
 		
 	}
 
