@@ -59,7 +59,7 @@ public class DateTreeHelper implements MutableTreeNode{
 	}
 	
 	@Override
-	public Enumeration children() {
+	public Enumeration<Object> children() {
 		return Collections.enumeration(children);
 	}
 

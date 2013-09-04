@@ -2,6 +2,10 @@ package de.clemensloos.imagebrowser.gui;
 
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -9,9 +13,12 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -24,24 +31,29 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
+import de.clemensloos.imagebrowser.MyProperties;
+import de.clemensloos.imagebrowser.database.MyTransferHandler;
 import de.clemensloos.imagebrowser.types.Date;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
 import de.clemensloos.imagebrowser.types.Event;
 import de.clemensloos.imagebrowser.types.Group;
 import de.clemensloos.imagebrowser.types.Image;
+import de.clemensloos.imagebrowser.types.Person;
 import de.clemensloos.imagebrowser.types.Tag;
-import de.clemensloos.imagebrowser.types.User;
 
 
 public class ImageBrowser2DGui implements ImageBrowserGui {
@@ -53,21 +65,12 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		try {
 			UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		SwingUtilities.invokeLater(new Runnable() {
+			@SuppressWarnings("unused")
 			@Override
 			public void run() {
 				new ImageBrowser2DGui();
@@ -81,42 +84,24 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 	ImageBrowser2DGui() {
 
+		imageBrowser = new ImageBrowser(this);
+
+		loadProperties();
+
 		initGui();
 
-		// console.append("Application started");
+		refreshGuiComponents();
+	}
 
-		// log("What a nice day.");
-		// log("Let's sort some pictures...");
 
-		imageBrowser = new ImageBrowser(this);
-		
-		buildEventTree();
-		buildDateTree();
+	private MyProperties guiProperties;
 
-//		String[] imgs = new String[] {
-//				"_MG_0417.jpg",
-//				"_MG_5356.jpg",
-//				"_MG_5444.jpg",
-//				"_MG_5787.jpg",
-//				"_MG_5862.jpg",
-//				"_MG_6006.jpg",
-//				"_MG_9200.jpg",
-//				"_MG_9334.jpg",
-//				"_MG_9412.jpg",
-//				"_MG_9674.jpg",
-//				};
-//		
-//		for(String s : imgs) {
-//			File f = new File("C:\\Dokumente und Einstellungen\\Clemens\\Eigene Dateien\\Fotos\\120000 Fotobuch\\" + s);
-//			imageBrowser.addImage(f);			
-//		}
 
-		List<Image> images = imageBrowser.getImages();
-		if (images != null) {
-			for (Image im : images) {
-				listModel.addElement(im);
-			}
-		}
+	private void loadProperties() {
+
+		String propFile = imageBrowser.getProperty("gui_properties_file");
+		guiProperties = new MyProperties(imageBrowser, propFile, true);
+
 	}
 
 
@@ -124,50 +109,44 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	DefaultListModel<Image> listModel;
 	JList<Image> list;
 	JScrollPane scrollPane;
-	
+
 	// LOWER AREA
 	JPanel bottomPanel;
 	JLabel hideBottomPanel;
 	boolean bottomPanelVisible = true;
-	
+
 	JPanel bottomFilterPanel;
 	DefaultListModel<Tag> tagListModel;
 	JList<Tag> tagList;
 	JScrollPane tagScrollPane;
-	DefaultListModel<User> userListModel;
-	JList<User> userList;
-	JScrollPane userScrollPane;
+	DefaultListModel<Person> personListModel;
+	JList<Person> personList;
+	JScrollPane personScrollPane;
 	DefaultListModel<Group> groupListModel;
 	JList<Group> groupList;
 	JScrollPane groupScrollPane;
-	
+
 	// LEFT AREA
 	JPanel leftPanel;
 	JLabel hideLeftPanel;
 	boolean leftPanelVisible = true;
 	JTabbedPane leftTabbedPane;
-	
+
 	JScrollPane eventScrollPane;
 	JTree eventTree;
 	DefaultTreeModel eventTreeModel;
 	DefaultMutableTreeNode eventRootNode;
-	
+
 	JScrollPane dateScrollPane;
 	JTree dateTree;
 	DefaultTreeModel dateTreeModel;
 	DateTreeHelper dateRootNode;
-	
 
 	JSplitPane splitPaneVerti;
 	JSplitPane splitPaneHoriz;
 
 	JFrame frame;
 
-
-//	JPanel mainPanel;
-
-
-	// JTextArea console;
 
 	private void initGui() {
 
@@ -176,6 +155,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		listModel = new DefaultListModel<Image>();
 		list = new JList<Image>(listModel);
 		scrollPane = new JScrollPane(list);
+		scrollPane.setTransferHandler(new MyTransferHandler(this));
 
 		// BUILD LOWER AREA ==================================================
 
@@ -198,46 +178,52 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				}
 			}
 		});
-		
+
 		tagListModel = new DefaultListModel<Tag>();
 		tagList = new JList<Tag>(tagListModel);
+		tagList.setSelectionModel(new DefaultListSelectionModel() {
+			@Override
+		    public void setSelectionInterval(int index0, int index1)  {
+		        if(tagList.isSelectedIndex(index0)) {
+		        	tagList.removeSelectionInterval(index0, index1);
+		        }
+		        else {
+		        	tagList.addSelectionInterval(index0, index1);
+		        }
+		    }
+		});
+		tagList.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				imageBrowser.setTags(tagList.getSelectedValuesList());
+				loadImages();
+			}
+		});
 		tagScrollPane = new JScrollPane(tagList);
-		// XXX
-		for (int i=0; i<10; i++) {
-			tagListModel.addElement(new Tag("tagged " + i));			
-		}
-		
-		userListModel = new DefaultListModel<User>();
-		userList = new JList<User>(userListModel);
-		userScrollPane = new JScrollPane(userList);
-		// XXX
-		for (int i=0; i<10; i++) {
-			userListModel.addElement(new User("user name " + i));			
-		}
-		
+
+		personListModel = new DefaultListModel<Person>();
+		personList = new JList<Person>(personListModel);
+		personScrollPane = new JScrollPane(personList);
+
 		groupListModel = new DefaultListModel<Group>();
 		groupList = new JList<Group>(groupListModel);
 		groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		groupScrollPane = new JScrollPane(groupList);
-		// XXX
-		for (int i=0; i<10; i++) {
-			groupListModel.addElement(new Group("group name " + i));			
-		}
 
 		bottomFilterPanel = new JPanel();
-		bottomFilterPanel = new FormDebugPanel();
+		// bottomFilterPanel = new FormDebugPanel();
 
 		String columnSpecs = "3dlu, pref:GROW, 3dlu, pref:GROW, 3dlu, pref:GROW, 3dlu";
 		String rowSpecs = "3dlu, 150px:GROW, 1dlu, 3dlu";
 		FormLayout layout = new FormLayout(columnSpecs, rowSpecs);
-		layout.setColumnGroups(new int[][]{{2, 4, 6}});
+		layout.setColumnGroups(new int[][] { { 2, 4, 6 } });
 		bottomFilterPanel.setLayout(layout);
 
 		PanelBuilder builder = new PanelBuilder(layout, bottomFilterPanel);
 		CellConstraints cc = new CellConstraints();
 
 		builder.add(tagScrollPane, cc.xywh(2, 2, 1, 2));
-		builder.add(userScrollPane, cc.xywh(4, 2, 1, 2));
+		builder.add(personScrollPane, cc.xywh(4, 2, 1, 2));
 		builder.add(groupScrollPane, cc.xywh(6, 2, 1, 2));
 		// builder.add(console, cc.xy(2, 5));
 
@@ -260,12 +246,25 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		});
 
 		// BUILD LEFT AREA ===================================================
-		
+
 		eventRootNode = new DefaultMutableTreeNode("Events");
 		eventTreeModel = new DefaultTreeModel(eventRootNode, true);
 		eventTree = new JTree(eventTreeModel);
+		eventTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		eventTree.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				if(e.getPath().getPathCount() == 3) {
+					imageBrowser.setEvent(e.getPath().getLastPathComponent().toString());
+				}
+				else {
+					imageBrowser.clearEvent();
+				}
+				loadImages();
+			}
+		});
 		eventScrollPane = new JScrollPane(eventTree);
-		
+
 		dateRootNode = new DateTreeHelper("Dates");
 		dateTreeModel = new DefaultTreeModel(dateRootNode, true);
 		dateTree = new JTree(dateTreeModel);
@@ -300,7 +299,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		splitPaneHoriz = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, splitPaneVerti);
 		splitPaneHoriz.setResizeWeight(0);
-		splitPaneHoriz.setDividerLocation(150);
+		splitPaneHoriz.setDividerLocation(250);
 		splitPaneHoriz.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
@@ -326,68 +325,219 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		frame.add(splitPaneHoriz);
 		frame.setResizable(true);
-		frame.setLocationByPlatform(true);
 		frame.pack();
-		frame.setMinimumSize(frame.getSize());
-		frame.setSize(750, 500);
+		frame.setMinimumSize(new Dimension(500, 500));
+
+		Point defaultSize = new Point(750, 600);
+		Point size = guiProperties.getPropPoint("gui_frame_size", defaultSize);
+
+		Point defaultPos = new Point(-10000, -10000);
+		Point pos = guiProperties.getPropPoint("gui_frame_position", defaultPos);
+		if (isWindowInScreenBounds(pos, size)) {
+			frame.setSize(size.x, size.y);
+			frame.setLocation(pos);
+		}
+		else {
+			frame.setSize(defaultSize.x, defaultSize.y);
+			frame.setLocationByPlatform(true);
+		}
+
 		frame.setVisible(true);
 		// frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 
 	}
-	
-	
+
+
+	@Override
+	public void dropImages(List<File> files) {
+
+		for (File f : files) {
+			imageBrowser.addImage(f);
+		}
+
+		refreshGuiComponents();
+
+	}
+
+
+	public void refreshGuiComponents() {
+
+		loadImages();
+
+		buildEventTree();
+		buildDateTree();
+
+		loadTags();
+		loadPersons();
+		loadGroups();
+
+	}
+
+
+	public void loadImages() {
+
+		listModel.removeAllElements();
+
+		List<Image> images = imageBrowser.getImages();
+		if (images != null) {
+			for (Image im : images) {
+				listModel.addElement(im);
+			}
+		}
+	}
+
+
 	public void buildEventTree() {
-		
+
 		eventRootNode.removeAllChildren();
-		
-		Event evt11 = new Event("Event 11", 0l, 0l);
-		Event evt12 = new Event("Event 12", 0l, 0l);
-		Event evt13 = new Event("Event 13", 0l, 0l);
-		Event evt21 = new Event("Event 21", 0l, 0l);
-		Event evt22 = new Event("Event 22", 0l, 0l);
-		Event evt23 = new Event("Event 23", 0l, 0l);
-		
-		DefaultMutableTreeNode node2013 = new DefaultMutableTreeNode("2013");
-		DefaultMutableTreeNode node2014 = new DefaultMutableTreeNode("2014");
-		
-		DefaultMutableTreeNode mevt11 = new DefaultMutableTreeNode(evt11, false);
-		node2013.add(mevt11);
-		DefaultMutableTreeNode mevt12 = new DefaultMutableTreeNode(evt12, false);
-		node2013.add(mevt12);
-		DefaultMutableTreeNode mevt13 = new DefaultMutableTreeNode(evt13, false);
-		node2013.add(mevt13);
-		
-		DefaultMutableTreeNode mevt21 = new DefaultMutableTreeNode(evt21, false);
-		node2014.add(mevt21);
-		DefaultMutableTreeNode mevt22 = new DefaultMutableTreeNode(evt22, false);
-		node2014.add(mevt22);
-		DefaultMutableTreeNode mevt23 = new DefaultMutableTreeNode(evt23, false);
-		node2014.add(mevt23);
-		
-		eventRootNode.add(node2013);
-		eventRootNode.add(node2014);
-		
+
+		List<Event> events = imageBrowser.getEvents();
+		if (events == null) {
+			return;
+		}
+
+		for (Event e : events) {
+			Calendar c = new GregorianCalendar();
+			c.setTimeInMillis(e.eventstart);
+			int year = c.get(Calendar.YEAR);
+
+			DefaultMutableTreeNode node = null;
+			
+			for (int i = 0; i < eventRootNode.getChildCount(); i++) {
+				Object o = eventRootNode.getChildAt(i);
+				if (o instanceof DefaultMutableTreeNode && o.toString().equals("" + year)) {
+					node = (DefaultMutableTreeNode) o;
+					break;
+				}
+			}
+
+			if (node == null) {
+				node = new DefaultMutableTreeNode("" + year);
+				eventRootNode.add(node);
+			}
+			
+			node.add(new DefaultMutableTreeNode(e, false));
+		}
+
 		eventTreeModel.reload();
 	}
-	
-	
+
+
 	public void buildDateTree() {
-		
+
 		List<Date> dates = imageBrowser.getDates();
-		for(Date d : dates) {
+		for (Date d : dates) {
 			dateRootNode.add(d);
 		}
-		
+
 		dateTreeModel.reload();
-		
-		
+
+	}
+
+
+	public void loadTags() {
+
+		tagListModel.clear();
+
+		List<Tag> tags = imageBrowser.getTags();
+		if (tags == null) {
+			return;
+		}
+		for (Tag t : tags) {
+			tagListModel.addElement(t);
+		}
+	}
+
+
+	public void loadPersons() {
+
+		personListModel.clear();
+
+		List<Person> persons = imageBrowser.getPersons();
+		if (persons == null) {
+			return;
+		}
+		for (Person p : persons) {
+			personListModel.addElement(p);
+		}
+	}
+
+
+	public void loadGroups() {
+
+		groupListModel.clear();
+
+		List<Group> groups = imageBrowser.getGroups();
+		if (groups == null) {
+			return;
+		}
+		for (Group g : groups) {
+			groupListModel.addElement(g);
+		}
 	}
 
 
 	@Override
 	public void log(String message) {
-		// if(message != null) {
-		// console.append("\n" + message);
-		// }
+		System.err.println(message);
 	}
+
+
+	@Override
+	public void shutDown() {
+
+		guiProperties.setProp("gui_frame_size", new Point(frame.getWidth(), frame.getHeight()));
+		guiProperties.setProp("gui_frame_position", frame.getLocation());
+
+	}
+
+
+	private static boolean isWindowInScreenBounds(Point location, Point size) {
+
+		Point myLocation = new Point(location);
+
+		if (!isLocationInScreenBounds(myLocation)) {
+			return false;
+		}
+
+		myLocation.translate(size.x, 0);
+		if (!isLocationInScreenBounds(myLocation)) {
+			return false;
+		}
+
+		myLocation.translate(0, size.y);
+		if (!isLocationInScreenBounds(myLocation)) {
+			return false;
+		}
+
+		myLocation.translate(-size.x, 0);
+		if (!isLocationInScreenBounds(myLocation)) {
+			return false;
+		}
+
+		return true;
+
+	}
+
+
+	/**
+	 * Check if the location is in the bounds of one of the graphics devices.
+	 * 
+	 * @param location
+	 * @return
+	 */
+	private static boolean isLocationInScreenBounds(Point location) {
+
+		GraphicsDevice[] graphicsDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+
+		for (int j = 0; j < graphicsDevices.length; j++) {
+
+			if (graphicsDevices[j].getDefaultConfiguration().getBounds().contains(location)) {
+
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

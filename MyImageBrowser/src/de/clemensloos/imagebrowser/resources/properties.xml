@@ -2,7 +2,7 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <comment>MyImageBrowser</comment>
-<entry key="foo">bar</entry>
 <entry key="last_project_folder"></entry>
 <entry key="last_project_name">myProject.sqlite</entry>
+<entry key="gui_properties_file">resources/guiProperties.xml</entry>
 </properties>

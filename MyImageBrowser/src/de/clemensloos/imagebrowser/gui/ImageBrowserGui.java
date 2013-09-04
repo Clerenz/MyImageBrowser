@@ -1,9 +1,14 @@
 package de.clemensloos.imagebrowser.gui;
 
-public interface ImageBrowserGui {
+import java.io.File;
+import java.util.List;
 
+public interface ImageBrowserGui {
+	
 	public abstract void log(String message);
 	
+	public abstract void dropImages(List<File> files);
 	
+	public abstract void shutDown();
 	
 }

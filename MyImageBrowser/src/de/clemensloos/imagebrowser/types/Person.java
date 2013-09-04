@@ -1,10 +1,10 @@
 package de.clemensloos.imagebrowser.types;
 
-public class User implements Comparable<User> {
+public class Person implements Comparable<Person> {
 
 	public String username;
 	
-	public User (String username) {
+	public Person (String username) {
 		this.username = username;
 	}
 	
@@ -35,10 +35,10 @@ public class User implements Comparable<User> {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof User)) {
+		if (!(obj instanceof Person)) {
 			return false;
 		}
-		User other = (User) obj;
+		Person other = (Person) obj;
 		if (username == null) {
 			if (other.username != null) {
 				return false;
@@ -50,7 +50,7 @@ public class User implements Comparable<User> {
 	}
 
 	@Override
-	public int compareTo(User other) {
+	public int compareTo(Person other) {
 		return this.username.compareToIgnoreCase(other.username);
 	}
 

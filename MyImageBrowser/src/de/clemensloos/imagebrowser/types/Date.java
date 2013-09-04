@@ -117,7 +117,7 @@ public class Date implements Comparable<Date>, MutableTreeNode{
 	}
 
 	@Override
-	public Enumeration children() {
+	public Enumeration<?> children() {
 		return null;
 	}
 

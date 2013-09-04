@@ -23,6 +23,10 @@ public class Event implements Comparable<Event>, TreeNode {
 		return this.eventname;
 	}
 	
+
+
+	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -70,7 +74,7 @@ public class Event implements Comparable<Event>, TreeNode {
 	}
 
 	@Override
-	public Enumeration children() {
+	public Enumeration<?> children() {
 		// TODO Auto-generated method stub
 		return null;
 	}

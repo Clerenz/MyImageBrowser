@@ -12,67 +12,77 @@ import org.apache.logging.log4j.Logger;
 import com.drew.imaging.ImageProcessingException;
 
 import de.clemensloos.imagebrowser.database.SqlInterface;
+import de.clemensloos.imagebrowser.database.SqlSelectBuilder;
 import de.clemensloos.imagebrowser.database.SqliteImpl;
 import de.clemensloos.imagebrowser.gui.ImageBrowserGui;
 import de.clemensloos.imagebrowser.types.Date;
+import de.clemensloos.imagebrowser.types.Event;
+import de.clemensloos.imagebrowser.types.Group;
 import de.clemensloos.imagebrowser.types.Image;
+import de.clemensloos.imagebrowser.types.Person;
+import de.clemensloos.imagebrowser.types.Tag;
 
 
 public class ImageBrowser {
-	
+
 	private Logger log = LogManager.getLogger("de.clemensloos.myimagebrowser");
-	
+
 	private String propertiesFile = "resources/properties.xml";
-	
+
 	private ImageBrowserGui imageBrowserGui;
 	private SqlInterface sqlInterface;
 	
+	private SqlSelectBuilder selectBuilder;
+
 	private MyProperties props;
 
 
 	public ImageBrowser(ImageBrowserGui imageBrowserGui) {
-		
+
 		log.trace("Start application ImageBrowser");
 
 		this.imageBrowserGui = imageBrowserGui;
-		
-		props = new MyProperties(this, propertiesFile);
+
+		props = new MyProperties(this, propertiesFile, false);
 		String projectFolder = props.getProp("last_project_folder");
 		String projectName = props.getProp("last_project_name");
-		
-//		sqlInterface = new HsqldbImpl(projectFolder, projectName);
+
+		// sqlInterface = new HsqldbImpl(projectFolder, projectName);
 		sqlInterface = new SqliteImpl(projectFolder, projectName);
-		
+
 		try {
 			sqlInterface.connect();
-			
-			if( ! sqlInterface.checkTablesExist()) {
+
+			if (!sqlInterface.checkTablesExist()) {
 				sqlInterface.clearTables();
-				sqlInterface.createTables();		
+				sqlInterface.createTables();
 			}
-			
+
 		} catch (ClassNotFoundException | SQLException e) {
 			log.error(e.getMessage(), e);
+			return;
 		}
 
 		sqlInterface.checkTablesExist();
 		
-	}
-	
-	
-	public List<Image> getImages() {
+		selectBuilder = new SqlSelectBuilder(sqlInterface.getConnection());
 		
+	}
+
+
+	public List<Image> getImages() {
+
 		try {
-			return sqlInterface.getImages();
+			return sqlInterface.getImages( selectBuilder.build() );
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
 			return null;
 		}
 	}
-	
-	
+
+
 	public List<Date> getDates() {
-		
+
 		try {
 			return sqlInterface.getDates();
 		} catch (SQLException e) {
@@ -82,39 +92,103 @@ public class ImageBrowser {
 	}
 	
 	
-	public void addImage(File f) {
+	public List<Event> getEvents() {
 		
+		try {
+			return sqlInterface.getEvents();
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+
+	public List<Tag> getTags() {
+
+		try {
+			return sqlInterface.getTags();
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+
+	public List<Group> getGroups() {
+
+		try {
+			return sqlInterface.getGroups();
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+
+	public List<Person> getPersons() {
+
+		try {
+			return sqlInterface.getPersons();
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+
+	public void addImage(File f) {
+
 		Image image = null;
 		try {
 			image = new Image(f);
 		} catch (ImageProcessingException | IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return;
 		}
-	
+
 		try {
 			sqlInterface.addImage(image);
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
-	
-	
-	
-	
-	
+
+
 	public void log(String message) {
 		imageBrowserGui.log(message);
 	}
-	
-	
+
+
 	public void shutDown() {
+
+		imageBrowserGui.shutDown();
+
 		try {
 			sqlInterface.shutDown();
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
+
+
+	public String getProperty(String key) {
+
+		return props.getProp(key);
+	}
 	
+	// SQL SELECT BUILDER =====================================================
+	
+	public void setTags(List<Tag> tags) {
+		selectBuilder.setTags(tags);
+	}
+	
+	public void setEvent(String event) {
+		selectBuilder.setEvent(event);
+	}
+	
+	public void clearEvent() {
+		selectBuilder.clearEvent();
+	}
 
 }

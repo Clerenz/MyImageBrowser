@@ -7,11 +7,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.clemensloos.imagebrowser.types.Group;
+import de.clemensloos.imagebrowser.types.Person;
+import de.clemensloos.imagebrowser.types.Tag;
+
 
 public class SqlSelectBuilder {
 
-	private List<String> tags = new ArrayList<String>();
-	private List<String> persons = new ArrayList<String>();
+	private List<Tag> tags = new ArrayList<Tag>();
+	private List<Person> persons = new ArrayList<Person>();
 	private List<String> groupPersons = new ArrayList<String>();
 	private boolean wholeGroup = false;
 
@@ -29,7 +33,7 @@ public class SqlSelectBuilder {
 		
 		String where = "";
 		
-		for (String s : tags) {
+		for (Tag s : tags) {
 			where += " AND image_id IN (SELECT image_id FROM images_tags WHERE tag = '"+s+"')";
 		}
 		
@@ -37,7 +41,7 @@ public class SqlSelectBuilder {
 			where += " AND imagedate > (SELECT datestart FROM events WHERE event = '"+event+"') AND imagedate < (SELECT dateend FROM events WHERE event = '"+event+"')";
 		}
 		
-		for (String s : persons) {
+		for (Person s : persons) {
 			where += " AND image_id IN (SELECT image_id FROM images_persons WHERE person = '"+s+"')";
 		}
 		
@@ -73,19 +77,19 @@ public class SqlSelectBuilder {
 	}
 
 
-	public void addTag(String tag) {
+	public void addTag(Tag tag) {
 		this.tags.add(tag);
 	}
 
 
-	public void removeTag(String tag) {
+	public void removeTag(Tag tag) {
 		if (this.tags.contains(tag)) {
 			this.tags.remove(tag);
 		}
 	}
 
 
-	public void setTags(List<String> tags) {
+	public void setTags(List<Tag> tags) {
 		this.tags = tags;
 	}
 
@@ -95,19 +99,19 @@ public class SqlSelectBuilder {
 	}
 	
 	
-	public void addPerson(String person) {
+	public void addPerson(Person person) {
 		this.persons.add(person);
 	}
 
 
-	public void removePerson(String person) {
+	public void removePerson(Person person) {
 		if (this.persons.contains(person)) {
 			this.persons.remove(person);
 		}
 	}
 
 
-	public void setPersons(List<String> persons) {
+	public void setPersons(List<Person> persons) {
 		this.persons = persons;
 	}
 
@@ -117,7 +121,7 @@ public class SqlSelectBuilder {
 	}
 	
 	
-	public void setGroup(String group, boolean wholeGroup) throws SQLException {
+	public void setGroup(Group group, boolean wholeGroup) throws SQLException {
 		this.wholeGroup = wholeGroup;
 		this.groupPersons.clear();
 		ResultSet rs = connection.createStatement().executeQuery("SELECT person FROM groups_persons WHERE groupname = '"+group+"'");
