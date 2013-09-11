@@ -66,5 +66,10 @@
   		<artifactId>sqlite-jdbc</artifactId>
   		<version>3.7.2</version>
   	</dependency>
+  	<dependency>
+  		<groupId>com.jtattoo</groupId>
+  		<artifactId>JTattoo</artifactId>
+  		<version>1.6.9</version>
+  	</dependency>
   </dependencies>
 </project>

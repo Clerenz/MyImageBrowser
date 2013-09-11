@@ -116,6 +116,10 @@ public class DateTreeHelper implements MutableTreeNode{
 	@Override
 	public void setUserObject(Object object) {
 	}
+	
+	public void removeAllChildren() {
+		children = new ArrayList<Object>();
+	}
 
 	
 }

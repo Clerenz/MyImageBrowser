@@ -1,4 +1,4 @@
-package de.clemensloos.imagebrowser.database;
+package de.clemensloos.imagebrowser.gui;
 
 import java.awt.Component;
 import java.awt.Cursor;
@@ -12,7 +12,6 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
-import de.clemensloos.imagebrowser.gui.ImageBrowserGui;
 
 public class MyTransferHandler extends TransferHandler {
 

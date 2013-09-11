@@ -25,7 +25,7 @@ public abstract class SqlInterface {
 	protected Connection connection;
 	protected Statement statement;
 
-	private static SimpleDateFormat sdf = new SimpleDateFormat("y-MM-d k:m:s");
+//	private static SimpleDateFormat sdf = new SimpleDateFormat("y-MM-d k:m:s");
 	private static SimpleDateFormat sdf_day = new SimpleDateFormat("y-MM-dd");
 
 

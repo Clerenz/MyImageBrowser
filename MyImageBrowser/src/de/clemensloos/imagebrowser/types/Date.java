@@ -1,5 +1,7 @@
 package de.clemensloos.imagebrowser.types;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 
 import javax.swing.tree.MutableTreeNode;
@@ -10,9 +12,15 @@ public class Date implements Comparable<Date>, MutableTreeNode{
 	public int year;
 	public int month;
 	public int day;
+	
+	public long longDateStart;
+	public long longDateEnd;
 
 	int numImages;
 
+	private static SimpleDateFormat sdf_day = new SimpleDateFormat("y-MM-dd");
+	private static long oneDay = 86400000l;
+	
 	public Date(String date, int numImages) {
 	
 		String[] tmp = date.split("-");
@@ -22,8 +30,18 @@ public class Date implements Comparable<Date>, MutableTreeNode{
 			day = Integer.parseInt(tmp[2]);
 		} catch ( NumberFormatException e ) {
 			// TODO
+			e.printStackTrace();
 		}
+		
 		this.numImages = numImages;
+		
+		try {
+			longDateStart = sdf_day.parse(date).getTime();
+			longDateEnd = sdf_day.parse(date).getTime() + oneDay;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public String getYear() {

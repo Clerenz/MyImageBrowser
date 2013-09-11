@@ -5,9 +5,11 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -19,6 +21,7 @@ import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -28,17 +31,15 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeSelectionModel;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -46,7 +47,6 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
 import de.clemensloos.imagebrowser.MyProperties;
-import de.clemensloos.imagebrowser.database.MyTransferHandler;
 import de.clemensloos.imagebrowser.types.Date;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
 import de.clemensloos.imagebrowser.types.Event;
@@ -64,7 +64,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	public static void main(String[] args) {
 
 		try {
-			UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
+//			UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
+//			UIManager.setLookAndFeel(com.jtattoo.plaf.hifi.HiFiLookAndFeel.class.getCanonicalName());
+			UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -106,16 +108,19 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 
 	// MAIN AREA
-	DefaultListModel<Image> listModel;
-	JList<Image> list;
+	JPanel mainPanel;
 	JScrollPane scrollPane;
 
 	// LOWER AREA
 	JPanel bottomPanel;
-	JLabel hideBottomPanel;
+
+	JPanel hideBottomPanel;
+	JButton ratingDown;
+	JButton ratingNorm;
+	JButton ratingUp;
+	JLabel hideBottomLabel;
 	boolean bottomPanelVisible = true;
 
-	JPanel bottomFilterPanel;
 	DefaultListModel<Tag> tagListModel;
 	JList<Tag> tagList;
 	JScrollPane tagScrollPane;
@@ -142,59 +147,88 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	DefaultTreeModel dateTreeModel;
 	DateTreeHelper dateRootNode;
 
+	// GENERAL
 	JSplitPane splitPaneVerti;
 	JSplitPane splitPaneHoriz;
 
 	JFrame frame;
+
+	// GLASS PANE
+	MyGlassPane glassPane;
 
 
 	private void initGui() {
 
 		// BUILD MAIN AREA ===================================================
 
-		listModel = new DefaultListModel<Image>();
-		list = new JList<Image>(listModel);
-		scrollPane = new JScrollPane(list);
+		// listModel = new DefaultListModel<Image>();
+		// list = new JList<Image>(listModel);
+		mainPanel = new JPanel(true);
+		mainPanel.setLayout(null);
+		scrollPane = new JScrollPane(mainPanel);
 		scrollPane.setTransferHandler(new MyTransferHandler(this));
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		// BUILD LOWER AREA ==================================================
 
-		hideBottomPanel = new JLabel("\\/");
-		hideBottomPanel.setHorizontalAlignment(SwingConstants.CENTER);
-		hideBottomPanel.addMouseListener(new MouseAdapter() {
+		ratingDown = new RatingButton(this, -1);
+		ratingNorm = new RatingButton(this, 0);
+		ratingUp = new RatingButton(this, 1);
+
+		hideBottomLabel = new JLabel("\\/");
+		hideBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		hideBottomLabel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent event) {
 				if (bottomPanelVisible) {
 					splitPaneVerti.setLastDividerLocation(splitPaneVerti.getDividerLocation());
-					splitPaneVerti.setDividerLocation(splitPaneVerti.getHeight() - hideBottomPanel.getHeight()
+					splitPaneVerti.setDividerLocation(splitPaneVerti.getHeight() - ratingDown.getHeight()
 							- splitPaneVerti.getDividerSize());
-					hideBottomPanel.setText("/\\");
+					hideBottomLabel.setText("/\\");
 					bottomPanelVisible = false;
 				}
 				else {
 					splitPaneVerti.setDividerLocation(splitPaneVerti.getLastDividerLocation());
-					hideBottomPanel.setText("\\/");
+					hideBottomLabel.setText("\\/");
 					bottomPanelVisible = true;
 				}
 			}
 		});
+		hideBottomPanel = new JPanel();
+		// hideBottomPanel = new FormDebugPanel();
+
+		String columnSpecs = "3dlu, pref, 3dlu, pref, 3dlu, pref, pref:GROW";
+		String rowSpecs = "pref";
+		FormLayout layout = new FormLayout(columnSpecs, rowSpecs);
+		layout.setColumnGroups(new int[][] { { 2, 4, 6 } });
+		hideBottomPanel.setLayout(layout);
+
+		PanelBuilder builder = new PanelBuilder(layout, hideBottomPanel);
+		CellConstraints cc = new CellConstraints();
+
+		builder.add(ratingDown, cc.xy(2, 1));
+		builder.add(ratingNorm, cc.xy(4, 1));
+		builder.add(ratingUp, cc.xy(6, 1));
+		builder.add(hideBottomLabel, cc.xy(7, 1));
 
 		tagListModel = new DefaultListModel<Tag>();
 		tagList = new JList<Tag>(tagListModel);
 		tagList.setSelectionModel(new DefaultListSelectionModel() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+
 			@Override
-		    public void setSelectionInterval(int index0, int index1)  {
-		        if(tagList.isSelectedIndex(index0)) {
-		        	tagList.removeSelectionInterval(index0, index1);
-		        }
-		        else {
-		        	tagList.addSelectionInterval(index0, index1);
-		        }
-		    }
-		});
-		tagList.addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
+			public void setSelectionInterval(int index0, int index1) {
+				if (tagList.isSelectedIndex(index0)) {
+					tagList.removeSelectionInterval(index0, index1);
+				}
+				else {
+					tagList.addSelectionInterval(index0, index1);
+				}
 				imageBrowser.setTags(tagList.getSelectedValuesList());
 				loadImages();
 			}
@@ -203,33 +237,72 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		personListModel = new DefaultListModel<Person>();
 		personList = new JList<Person>(personListModel);
+		personList.setSelectionModel(new DefaultListSelectionModel() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+
+			@Override
+			public void setSelectionInterval(int index0, int index1) {
+				if (personList.isSelectedIndex(index0)) {
+					personList.removeSelectionInterval(index0, index1);
+				}
+				else {
+					personList.addSelectionInterval(index0, index1);
+				}
+				imageBrowser.setPersons(personList.getSelectedValuesList());
+				loadImages();
+			}
+
+		});
 		personScrollPane = new JScrollPane(personList);
 
 		groupListModel = new DefaultListModel<Group>();
 		groupList = new JList<Group>(groupListModel);
+		groupList.setSelectionModel(new DefaultListSelectionModel() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+
+			@Override
+			public void setSelectionInterval(int index0, int index1) {
+				if (groupList.isSelectedIndex(index0)) {
+					groupList.removeSelectionInterval(index0, index1);
+					imageBrowser.clearGroup();
+				}
+				else {
+					super.setSelectionInterval(index0, index1);
+					imageBrowser.setGroup(groupList.getSelectedValue(), true);
+				}
+				loadImages();
+			}
+
+		});
 		groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		groupScrollPane = new JScrollPane(groupList);
 
-		bottomFilterPanel = new JPanel();
+		bottomPanel = new JPanel();
 		// bottomFilterPanel = new FormDebugPanel();
 
-		String columnSpecs = "3dlu, pref:GROW, 3dlu, pref:GROW, 3dlu, pref:GROW, 3dlu";
-		String rowSpecs = "3dlu, 150px:GROW, 1dlu, 3dlu";
-		FormLayout layout = new FormLayout(columnSpecs, rowSpecs);
+		columnSpecs = "3dlu, pref:GROW, 3dlu, pref:GROW, 3dlu, pref:GROW, 3dlu";
+		rowSpecs = "pref, 3dlu, 150px:GROW, 1dlu, 3dlu";
+		layout = new FormLayout(columnSpecs, rowSpecs);
 		layout.setColumnGroups(new int[][] { { 2, 4, 6 } });
-		bottomFilterPanel.setLayout(layout);
+		bottomPanel.setLayout(layout);
 
-		PanelBuilder builder = new PanelBuilder(layout, bottomFilterPanel);
-		CellConstraints cc = new CellConstraints();
+		builder = new PanelBuilder(layout, bottomPanel);
+		cc = new CellConstraints();
 
-		builder.add(tagScrollPane, cc.xywh(2, 2, 1, 2));
-		builder.add(personScrollPane, cc.xywh(4, 2, 1, 2));
-		builder.add(groupScrollPane, cc.xywh(6, 2, 1, 2));
-		// builder.add(console, cc.xy(2, 5));
-
-		bottomPanel = new JPanel(new BorderLayout());
-		bottomPanel.add(bottomFilterPanel);
-		bottomPanel.add(hideBottomPanel, BorderLayout.NORTH);
+		builder.add(hideBottomPanel, cc.xywh(1, 1, 7, 1));
+		builder.add(tagScrollPane, cc.xywh(2, 3, 1, 2));
+		builder.add(personScrollPane, cc.xywh(4, 3, 1, 2));
+		builder.add(groupScrollPane, cc.xywh(6, 3, 1, 2));
 
 		// BUILD VERTICAL SPLIT PANE =========================================
 
@@ -239,7 +312,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (!bottomPanelVisible && (int) evt.getNewValue() < (int) evt.getOldValue()) {
-					hideBottomPanel.setText("\\/");
+					hideBottomLabel.setText("\\/");
 					bottomPanelVisible = true;
 				}
 			}
@@ -250,29 +323,32 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		eventRootNode = new DefaultMutableTreeNode("Events");
 		eventTreeModel = new DefaultTreeModel(eventRootNode, true);
 		eventTree = new JTree(eventTreeModel);
-		eventTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		eventTree.addTreeSelectionListener(new TreeSelectionListener() {
-			@Override
-			public void valueChanged(TreeSelectionEvent e) {
-				if(e.getPath().getPathCount() == 3) {
-					imageBrowser.setEvent(e.getPath().getLastPathComponent().toString());
-				}
-				else {
-					imageBrowser.clearEvent();
-				}
-				loadImages();
-			}
-		});
+		eventTree.setSelectionModel(new EventTreeSelectionModel(this));
 		eventScrollPane = new JScrollPane(eventTree);
 
 		dateRootNode = new DateTreeHelper("Dates");
 		dateTreeModel = new DefaultTreeModel(dateRootNode, true);
 		dateTree = new JTree(dateTreeModel);
+		dateTree.setSelectionModel(new DateTreeSelectionModel(this));
 		dateScrollPane = new JScrollPane(dateTree);
 
 		leftTabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
 		leftTabbedPane.addTab("Events", eventScrollPane);
 		leftTabbedPane.addTab("Datum", dateScrollPane);
+		leftTabbedPane.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (leftTabbedPane.getSelectedComponent().equals(eventScrollPane)) {
+					dateTree.setSelectionInterval(-10, -1);
+					imageBrowser.clearDates();
+				}
+				else if (leftTabbedPane.getSelectedComponent().equals(dateScrollPane)) {
+					eventTree.setSelectionInterval(-10, -1);
+					imageBrowser.clearEvent();
+				}
+				loadImages();
+			}
+		});
 
 		hideLeftPanel = new JLabel(" < ");
 		hideLeftPanel.addMouseListener(new MouseAdapter() {
@@ -313,7 +389,6 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		// BUILD THE FRAME ===================================================
 
 		frame = new JFrame("Image Browser");
-		// frame.setUndecorated(true);
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
@@ -327,6 +402,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		frame.setResizable(true);
 		frame.pack();
 		frame.setMinimumSize(new Dimension(500, 500));
+
+		glassPane = new MyGlassPane();
+		frame.setGlassPane(glassPane);
 
 		Point defaultSize = new Point(750, 600);
 		Point size = guiProperties.getPropPoint("gui_frame_size", defaultSize);
@@ -343,7 +421,30 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		}
 
 		frame.setVisible(true);
-		// frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+
+		KeyboardFocusManager.getCurrentKeyboardFocusManager()
+				.addKeyEventDispatcher(new MyKeyEventDispatcher(this));
+
+	}
+
+
+	void hideAndShowToolbars(boolean leftOnly) {
+
+		boolean hide = bottomPanelVisible || leftPanelVisible;
+
+		MouseEvent me;
+		if (leftOnly || hide == leftPanelVisible) {
+			me = new MouseEvent(hideLeftPanel, 0, 0, 0, 1, 1, 1, false);
+			for (MouseListener ml : hideLeftPanel.getMouseListeners()) {
+				ml.mouseReleased(me);
+			}
+		}
+		if (!leftOnly && hide == bottomPanelVisible) {
+			me = new MouseEvent(hideBottomLabel, 0, 0, 0, 1, 1, 1, false);
+			for (MouseListener ml : hideBottomLabel.getMouseListeners()) {
+				ml.mouseReleased(me);
+			}
+		}
 
 	}
 
@@ -376,14 +477,36 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 	public void loadImages() {
 
-		listModel.removeAllElements();
+		mainPanel.removeAll();
+		int i = 0;
+		int row = 0;
+		int columns = 3;
+		int width = mainPanel.getWidth();
+		int gap = 4;
+		int diameter = (width - ((columns + 1) * gap)) / columns;
 
 		List<Image> images = imageBrowser.getImages();
-		if (images != null) {
-			for (Image im : images) {
-				listModel.addElement(im);
+		if (images.size() > 0) {
+			for (row = 0; row < Integer.MAX_VALUE; row++) {
+				int y = gap + (row * (diameter + gap));
+				for (int col = 0; col < columns; col++) {
+					int x = gap + (col * (diameter + gap));
+					mainPanel.add(images.get(i).initComponent(x, y, diameter));
+					i++;
+					if (i == images.size()) {
+						break;
+					}
+				}
+				if (i == images.size()) {
+					break;
+				}
 			}
+			Dimension d = new Dimension(width, (row + 1) * (diameter + gap) + gap);
+			mainPanel.setPreferredSize(d);
 		}
+
+		scrollPane.validate();
+		scrollPane.repaint();
 	}
 
 
@@ -402,7 +525,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			int year = c.get(Calendar.YEAR);
 
 			DefaultMutableTreeNode node = null;
-			
+
 			for (int i = 0; i < eventRootNode.getChildCount(); i++) {
 				Object o = eventRootNode.getChildAt(i);
 				if (o instanceof DefaultMutableTreeNode && o.toString().equals("" + year)) {
@@ -415,7 +538,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				node = new DefaultMutableTreeNode("" + year);
 				eventRootNode.add(node);
 			}
-			
+
 			node.add(new DefaultMutableTreeNode(e, false));
 		}
 
@@ -424,6 +547,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 
 	public void buildDateTree() {
+
+		dateRootNode.removeAllChildren();
 
 		List<Date> dates = imageBrowser.getDates();
 		for (Date d : dates) {
@@ -489,6 +614,11 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		guiProperties.setProp("gui_frame_size", new Point(frame.getWidth(), frame.getHeight()));
 		guiProperties.setProp("gui_frame_position", frame.getLocation());
 
+	}
+
+
+	public void showUserMessage(String message) {
+		glassPane.show(message);
 	}
 
 

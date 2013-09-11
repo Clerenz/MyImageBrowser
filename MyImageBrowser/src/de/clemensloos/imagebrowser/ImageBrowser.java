@@ -183,12 +183,49 @@ public class ImageBrowser {
 		selectBuilder.setTags(tags);
 	}
 	
+	public void setPersons(List<Person> persons) {
+		selectBuilder.setPersons(persons);
+	}
+	
+	public void clearGroup() {
+		selectBuilder.clearGroup();
+	}
+	
+	public void setGroup(Group group, boolean wholeGroup) {
+		try {
+			selectBuilder.setGroup(group, wholeGroup);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public void setEvent(String event) {
 		selectBuilder.setEvent(event);
 	}
 	
 	public void clearEvent() {
 		selectBuilder.clearEvent();
+	}
+	
+	public void addDate(Date d) {
+		selectBuilder.addDate(d);					
+	}
+	
+	public void removeDate(Date d) {
+		selectBuilder.removeDate(d);					
+	}
+		
+	public void clearDates() {
+		selectBuilder.clearDates();
+	}
+	
+	public void removeRating(Integer i) {
+		selectBuilder.removeRating(i);
+	}
+	
+	public void addRating(Integer i) {
+		selectBuilder.addRating(i);
 	}
 
 }
