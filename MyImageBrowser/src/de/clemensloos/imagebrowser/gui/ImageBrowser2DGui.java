@@ -233,6 +233,18 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				loadImages();
 			}
 		});
+		tagList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("event");
+				if(e.getButton() == MouseEvent.BUTTON3
+						&& e.getClickCount() == 1) {
+					System.out.println("mine");
+					imageBrowser.createTag(new Tag("test"));
+					refreshGuiComponents();
+				}
+			}
+		});
 		tagScrollPane = new JScrollPane(tagList);
 
 		personListModel = new DefaultListModel<Person>();

@@ -103,6 +103,24 @@ public class ImageBrowser {
 	}
 
 
+	public void createTag(Tag tag) {
+		try {
+			sqlInterface.createTag(tag);
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+	
+	
+	public void deleteTag(Tag tag) {
+		try {
+			sqlInterface.deleteTag(tag);
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+	
+	
 	public List<Tag> getTags() {
 
 		try {

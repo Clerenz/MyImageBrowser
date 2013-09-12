@@ -154,6 +154,18 @@ public abstract class SqlInterface {
 
 		return events;
 	}
+	
+	
+	public void createTag(Tag tag) throws SQLException {
+		
+		statement.executeUpdate("INSERT INTO tags VALUES ('" + tag.tagname + "');");
+	}
+	
+	
+	public void deleteTag(Tag tag) throws SQLException {
+		
+		statement.executeUpdate("DELETE FROM tags WHERE tag = '" + tag.tagname + "'");
+	}
 
 
 	public List<Tag> getTags() throws SQLException {
