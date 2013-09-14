@@ -236,11 +236,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		tagList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				System.out.println("event");
 				if(e.getButton() == MouseEvent.BUTTON3
 						&& e.getClickCount() == 1) {
-					System.out.println("mine");
-					imageBrowser.createTag(new Tag("test"));
+//					imageBrowser.createTag(new Tag("test")); XXX
 					refreshGuiComponents();
 				}
 			}
@@ -492,7 +490,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		mainPanel.removeAll();
 		int i = 0;
 		int row = 0;
-		int columns = 3;
+		int columns = 10;
 		int width = mainPanel.getWidth();
 		int gap = 4;
 		int diameter = (width - ((columns + 1) * gap)) / columns;
@@ -503,7 +501,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				int y = gap + (row * (diameter + gap));
 				for (int col = 0; col < columns; col++) {
 					int x = gap + (col * (diameter + gap));
-					mainPanel.add(images.get(i).initComponent(x, y, diameter));
+					mainPanel.add(new ImagePanel(images.get(i), x, y, diameter));
 					i++;
 					if (i == images.size()) {
 						break;
