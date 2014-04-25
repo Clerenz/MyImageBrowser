@@ -1,22 +1,18 @@
 package de.clemensloos.imagebrowser.types;
 
+public class ImgPerson implements Comparable<ImgPerson> {
 
-public class Tag implements Comparable<Tag>{
-
-	public String tagname;
-
-
-	public Tag(String tagname) {
-		this.tagname = tagname;
-	}
+	public String username;
 	
+	public ImgPerson (String username) {
+		this.username = username;
+	}
 	
 	@Override
 	public String toString() {
-		return this.tagname;
+		return this.username;
 	}
-
-
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -24,10 +20,9 @@ public class Tag implements Comparable<Tag>{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((tagname == null) ? 0 : tagname.toLowerCase().hashCode());
+		result = prime * result + ((username == null) ? 0 : username.toLowerCase().hashCode());
 		return result;
 	}
-
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -40,24 +35,23 @@ public class Tag implements Comparable<Tag>{
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Tag)) {
+		if (!(obj instanceof ImgPerson)) {
 			return false;
 		}
-		Tag other = (Tag) obj;
-		if (tagname == null) {
-			if (other.tagname != null) {
+		ImgPerson other = (ImgPerson) obj;
+		if (username == null) {
+			if (other.username != null) {
 				return false;
 			}
-		} else if (!tagname.equalsIgnoreCase(other.tagname)) {
+		} else if (!username.equalsIgnoreCase(other.username)) {
 			return false;
 		}
 		return true;
 	}
 
-
 	@Override
-	public int compareTo(Tag other) {
-		return this.tagname.compareToIgnoreCase(other.tagname);
+	public int compareTo(ImgPerson other) {
+		return this.username.compareToIgnoreCase(other.username);
 	}
 
 }

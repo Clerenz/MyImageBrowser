@@ -47,13 +47,13 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
 import de.clemensloos.imagebrowser.MyProperties;
-import de.clemensloos.imagebrowser.types.Date;
+import de.clemensloos.imagebrowser.types.ImgDate;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
-import de.clemensloos.imagebrowser.types.Event;
-import de.clemensloos.imagebrowser.types.Group;
+import de.clemensloos.imagebrowser.types.ImgEvent;
+import de.clemensloos.imagebrowser.types.ImgGroup;
 import de.clemensloos.imagebrowser.types.Image;
-import de.clemensloos.imagebrowser.types.Person;
-import de.clemensloos.imagebrowser.types.Tag;
+import de.clemensloos.imagebrowser.types.ImgPerson;
+import de.clemensloos.imagebrowser.types.ImgTag;
 
 
 public class ImageBrowser2DGui implements ImageBrowserGui {
@@ -121,14 +121,14 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	JLabel hideBottomLabel;
 	boolean bottomPanelVisible = true;
 
-	DefaultListModel<Tag> tagListModel;
-	JList<Tag> tagList;
+	DefaultListModel<ImgTag> tagListModel;
+	JList<ImgTag> tagList;
 	JScrollPane tagScrollPane;
-	DefaultListModel<Person> personListModel;
-	JList<Person> personList;
+	DefaultListModel<ImgPerson> personListModel;
+	JList<ImgPerson> personList;
 	JScrollPane personScrollPane;
-	DefaultListModel<Group> groupListModel;
-	JList<Group> groupList;
+	DefaultListModel<ImgGroup> groupListModel;
+	JList<ImgGroup> groupList;
 	JScrollPane groupScrollPane;
 
 	// LEFT AREA
@@ -169,6 +169,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		scrollPane.setTransferHandler(new MyTransferHandler(this));
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 
 		// BUILD LOWER AREA ==================================================
 
@@ -212,8 +213,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		builder.add(ratingUp, cc.xy(6, 1));
 		builder.add(hideBottomLabel, cc.xy(7, 1));
 
-		tagListModel = new DefaultListModel<Tag>();
-		tagList = new JList<Tag>(tagListModel);
+		tagListModel = new DefaultListModel<ImgTag>();
+		tagList = new JList<ImgTag>(tagListModel);
 		tagList.setSelectionModel(new DefaultListSelectionModel() {
 			/**
 			 * 
@@ -245,8 +246,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		});
 		tagScrollPane = new JScrollPane(tagList);
 
-		personListModel = new DefaultListModel<Person>();
-		personList = new JList<Person>(personListModel);
+		personListModel = new DefaultListModel<ImgPerson>();
+		personList = new JList<ImgPerson>(personListModel);
 		personList.setSelectionModel(new DefaultListSelectionModel() {
 
 			/**
@@ -270,8 +271,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		});
 		personScrollPane = new JScrollPane(personList);
 
-		groupListModel = new DefaultListModel<Group>();
-		groupList = new JList<Group>(groupListModel);
+		groupListModel = new DefaultListModel<ImgGroup>();
+		groupList = new JList<ImgGroup>(groupListModel);
 		groupList.setSelectionModel(new DefaultListSelectionModel() {
 
 			/**
@@ -490,7 +491,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		mainPanel.removeAll();
 		int i = 0;
 		int row = 0;
-		int columns = 10;
+		int columns = 4;
 		int width = mainPanel.getWidth();
 		int gap = 4;
 		int diameter = (width - ((columns + 1) * gap)) / columns;
@@ -524,12 +525,12 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		eventRootNode.removeAllChildren();
 
-		List<Event> events = imageBrowser.getEvents();
+		List<ImgEvent> events = imageBrowser.getEvents();
 		if (events == null) {
 			return;
 		}
 
-		for (Event e : events) {
+		for (ImgEvent e : events) {
 			Calendar c = new GregorianCalendar();
 			c.setTimeInMillis(e.eventstart);
 			int year = c.get(Calendar.YEAR);
@@ -560,8 +561,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		dateRootNode.removeAllChildren();
 
-		List<Date> dates = imageBrowser.getDates();
-		for (Date d : dates) {
+		List<ImgDate> dates = imageBrowser.getDates();
+		for (ImgDate d : dates) {
 			dateRootNode.add(d);
 		}
 
@@ -574,11 +575,11 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		tagListModel.clear();
 
-		List<Tag> tags = imageBrowser.getTags();
+		List<ImgTag> tags = imageBrowser.getTags();
 		if (tags == null) {
 			return;
 		}
-		for (Tag t : tags) {
+		for (ImgTag t : tags) {
 			tagListModel.addElement(t);
 		}
 	}
@@ -588,11 +589,11 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		personListModel.clear();
 
-		List<Person> persons = imageBrowser.getPersons();
+		List<ImgPerson> persons = imageBrowser.getPersons();
 		if (persons == null) {
 			return;
 		}
-		for (Person p : persons) {
+		for (ImgPerson p : persons) {
 			personListModel.addElement(p);
 		}
 	}
@@ -602,11 +603,11 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		groupListModel.clear();
 
-		List<Group> groups = imageBrowser.getGroups();
+		List<ImgGroup> groups = imageBrowser.getGroups();
 		if (groups == null) {
 			return;
 		}
-		for (Group g : groups) {
+		for (ImgGroup g : groups) {
 			groupListModel.addElement(g);
 		}
 	}

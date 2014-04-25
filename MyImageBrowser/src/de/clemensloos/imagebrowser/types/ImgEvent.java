@@ -4,14 +4,14 @@ import java.util.Enumeration;
 
 import javax.swing.tree.TreeNode;
 
-public class Event implements Comparable<Event>, TreeNode {
+public class ImgEvent implements Comparable<ImgEvent>, TreeNode {
 
 	public String eventname;
 	
 	public long eventstart;
 	public long eventend;
 	
-	public Event(String eventname, long eventstart, long eventend) {
+	public ImgEvent(String eventname, long eventstart, long eventend) {
 		this.eventname = eventname;
 		
 		this.eventstart = eventstart;
@@ -50,10 +50,10 @@ public class Event implements Comparable<Event>, TreeNode {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Event)) {
+		if (!(obj instanceof ImgEvent)) {
 			return false;
 		}
-		Event other = (Event) obj;
+		ImgEvent other = (ImgEvent) obj;
 		if (eventname == null) {
 			if (other.eventname != null) {
 				return false;
@@ -68,7 +68,7 @@ public class Event implements Comparable<Event>, TreeNode {
 	}
 
 	@Override
-	public int compareTo(Event arg0) {
+	public int compareTo(ImgEvent arg0) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

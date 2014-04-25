@@ -7,7 +7,7 @@ import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import de.clemensloos.imagebrowser.types.Date;
+import de.clemensloos.imagebrowser.types.ImgDate;
 
 
 class DateTreeSelectionModel extends DefaultTreeSelectionModel {
@@ -39,7 +39,7 @@ class DateTreeSelectionModel extends DefaultTreeSelectionModel {
 			super.addSelectionPath(p);
 		}
 		else if (p.getPathCount() == 4) {
-			gui.imageBrowser.addDate((Date) p.getLastPathComponent());
+			gui.imageBrowser.addDate((ImgDate) p.getLastPathComponent());
 			super.addSelectionPath(p);
 		}
 		gui.loadImages();
@@ -55,7 +55,7 @@ class DateTreeSelectionModel extends DefaultTreeSelectionModel {
 			removeParentSelectionPath(p);
 		}
 		if (p.getPathCount() == 4) {
-			gui.imageBrowser.removeDate((Date) p.getLastPathComponent());
+			gui.imageBrowser.removeDate((ImgDate) p.getLastPathComponent());
 		}
 		super.removeSelectionPath(p);
 		gui.loadImages();
@@ -70,7 +70,7 @@ class DateTreeSelectionModel extends DefaultTreeSelectionModel {
 			}
 		}
 		else if (p.getPathCount() == 4) {
-			gui.imageBrowser.removeDate((Date) p.getLastPathComponent());
+			gui.imageBrowser.removeDate((ImgDate) p.getLastPathComponent());
 		}
 		super.removeSelectionPath(p);
 	}

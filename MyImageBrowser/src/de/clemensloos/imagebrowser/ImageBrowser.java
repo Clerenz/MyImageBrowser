@@ -15,12 +15,12 @@ import de.clemensloos.imagebrowser.database.SqlInterface;
 import de.clemensloos.imagebrowser.database.SqlSelectBuilder;
 import de.clemensloos.imagebrowser.database.SqliteImpl;
 import de.clemensloos.imagebrowser.gui.ImageBrowserGui;
-import de.clemensloos.imagebrowser.types.Date;
-import de.clemensloos.imagebrowser.types.Event;
-import de.clemensloos.imagebrowser.types.Group;
+import de.clemensloos.imagebrowser.types.ImgDate;
+import de.clemensloos.imagebrowser.types.ImgEvent;
+import de.clemensloos.imagebrowser.types.ImgGroup;
 import de.clemensloos.imagebrowser.types.Image;
-import de.clemensloos.imagebrowser.types.Person;
-import de.clemensloos.imagebrowser.types.Tag;
+import de.clemensloos.imagebrowser.types.ImgPerson;
+import de.clemensloos.imagebrowser.types.ImgTag;
 
 
 public class ImageBrowser {
@@ -81,7 +81,7 @@ public class ImageBrowser {
 	}
 
 
-	public List<Date> getDates() {
+	public List<ImgDate> getDates() {
 
 		try {
 			return sqlInterface.getDates();
@@ -92,7 +92,7 @@ public class ImageBrowser {
 	}
 	
 	
-	public List<Event> getEvents() {
+	public List<ImgEvent> getEvents() {
 		
 		try {
 			return sqlInterface.getEvents();
@@ -103,7 +103,7 @@ public class ImageBrowser {
 	}
 
 
-	public void createTag(Tag tag) {
+	public void createTag(ImgTag tag) {
 		try {
 			sqlInterface.createTag(tag);
 		} catch (SQLException e) {
@@ -112,7 +112,7 @@ public class ImageBrowser {
 	}
 	
 	
-	public void deleteTag(Tag tag) {
+	public void deleteTag(ImgTag tag) {
 		try {
 			sqlInterface.deleteTag(tag);
 		} catch (SQLException e) {
@@ -121,7 +121,7 @@ public class ImageBrowser {
 	}
 	
 	
-	public List<Tag> getTags() {
+	public List<ImgTag> getTags() {
 
 		try {
 			return sqlInterface.getTags();
@@ -132,7 +132,7 @@ public class ImageBrowser {
 	}
 
 
-	public List<Group> getGroups() {
+	public List<ImgGroup> getGroups() {
 
 		try {
 			return sqlInterface.getGroups();
@@ -143,7 +143,7 @@ public class ImageBrowser {
 	}
 
 
-	public List<Person> getPersons() {
+	public List<ImgPerson> getPersons() {
 
 		try {
 			return sqlInterface.getPersons();
@@ -197,11 +197,11 @@ public class ImageBrowser {
 	
 	// SQL SELECT BUILDER =====================================================
 	
-	public void setTags(List<Tag> tags) {
+	public void setTags(List<ImgTag> tags) {
 		selectBuilder.setTags(tags);
 	}
 	
-	public void setPersons(List<Person> persons) {
+	public void setPersons(List<ImgPerson> persons) {
 		selectBuilder.setPersons(persons);
 	}
 	
@@ -209,7 +209,7 @@ public class ImageBrowser {
 		selectBuilder.clearGroup();
 	}
 	
-	public void setGroup(Group group, boolean wholeGroup) {
+	public void setGroup(ImgGroup group, boolean wholeGroup) {
 		try {
 			selectBuilder.setGroup(group, wholeGroup);
 		} catch (SQLException e) {
@@ -226,11 +226,11 @@ public class ImageBrowser {
 		selectBuilder.clearEvent();
 	}
 	
-	public void addDate(Date d) {
+	public void addDate(ImgDate d) {
 		selectBuilder.addDate(d);					
 	}
 	
-	public void removeDate(Date d) {
+	public void removeDate(ImgDate d) {
 		selectBuilder.removeDate(d);					
 	}
 		

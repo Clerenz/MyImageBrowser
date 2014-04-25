@@ -23,7 +23,7 @@ public class DateTreeHelper implements MutableTreeNode{
 		children.add(child);
 	}
 	
-	public void add(Date date) {
+	public void add(ImgDate date) {
 		String year = date.getYear();
 		for(Object o : children) {
 			if(o instanceof DateTreeHelper) {
@@ -38,7 +38,7 @@ public class DateTreeHelper implements MutableTreeNode{
 		dth.addSecond(date);
 	}
 	
-	public void addSecond(Date date) {
+	public void addSecond(ImgDate date) {
 		String month = date.getMonth();
 		for(Object o : children) {
 			if(o instanceof DateTreeHelper) {

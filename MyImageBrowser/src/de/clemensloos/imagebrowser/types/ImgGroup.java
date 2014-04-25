@@ -1,16 +1,16 @@
 package de.clemensloos.imagebrowser.types;
 
-public class Person implements Comparable<Person> {
+public class ImgGroup implements Comparable<ImgGroup> {
 
-	public String username;
+	public String groupname;
 	
-	public Person (String username) {
-		this.username = username;
+	public ImgGroup (String username) {
+		this.groupname = username;
 	}
 	
 	@Override
 	public String toString() {
-		return this.username;
+		return this.groupname;
 	}
 	
 	/* (non-Javadoc)
@@ -20,7 +20,7 @@ public class Person implements Comparable<Person> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((username == null) ? 0 : username.toLowerCase().hashCode());
+		result = prime * result + ((groupname == null) ? 0 : groupname.toLowerCase().hashCode());
 		return result;
 	}
 
@@ -35,23 +35,23 @@ public class Person implements Comparable<Person> {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Person)) {
+		if (!(obj instanceof ImgGroup)) {
 			return false;
 		}
-		Person other = (Person) obj;
-		if (username == null) {
-			if (other.username != null) {
+		ImgGroup other = (ImgGroup) obj;
+		if (groupname == null) {
+			if (other.groupname != null) {
 				return false;
 			}
-		} else if (!username.equalsIgnoreCase(other.username)) {
+		} else if (!groupname.equalsIgnoreCase(other.groupname)) {
 			return false;
 		}
 		return true;
 	}
 
 	@Override
-	public int compareTo(Person other) {
-		return this.username.compareToIgnoreCase(other.username);
+	public int compareTo(ImgGroup other) {
+		return this.groupname.compareToIgnoreCase(other.groupname);
 	}
 
 }

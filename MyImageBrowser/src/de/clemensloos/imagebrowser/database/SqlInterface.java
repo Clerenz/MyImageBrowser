@@ -11,12 +11,12 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import de.clemensloos.imagebrowser.types.Date;
-import de.clemensloos.imagebrowser.types.Event;
-import de.clemensloos.imagebrowser.types.Group;
+import de.clemensloos.imagebrowser.types.ImgDate;
+import de.clemensloos.imagebrowser.types.ImgEvent;
+import de.clemensloos.imagebrowser.types.ImgGroup;
 import de.clemensloos.imagebrowser.types.Image;
-import de.clemensloos.imagebrowser.types.Person;
-import de.clemensloos.imagebrowser.types.Tag;
+import de.clemensloos.imagebrowser.types.ImgPerson;
+import de.clemensloos.imagebrowser.types.ImgTag;
 
 
 public abstract class SqlInterface {
@@ -111,14 +111,14 @@ public abstract class SqlInterface {
 	}
 
 
-	public List<Date> getDates() throws SQLException {
+	public List<ImgDate> getDates() throws SQLException {
 
 		ResultSet rs = statement.executeQuery("SELECT * FROM days ORDER BY day ASC");
-		List<Date> dates = new ArrayList<Date>();
+		List<ImgDate> dates = new ArrayList<ImgDate>();
 		while (rs.next()) {
 			String date = rs.getString("day");
 			int numImages = rs.getInt("num_images");
-			dates.add(new Date(date, numImages));
+			dates.add(new ImgDate(date, numImages));
 		}
 		return dates;
 	}
@@ -139,65 +139,65 @@ public abstract class SqlInterface {
 	}
 
 
-	public List<Event> getEvents() throws SQLException {
+	public List<ImgEvent> getEvents() throws SQLException {
 		
 		ResultSet rs = statement.executeQuery("SELECT * FROM events ORDER BY datestart ASC");
-		List<Event> events = new ArrayList<Event>();
+		List<ImgEvent> events = new ArrayList<ImgEvent>();
 		while (rs.next()) {
 
 			String event = rs.getString("event");
 			long datestart = rs.getTimestamp("datestart").getTime();
 			long dateend = rs.getTimestamp("dateend").getTime();
 
-			events.add(new Event(event, datestart, dateend));
+			events.add(new ImgEvent(event, datestart, dateend));
 		}
 
 		return events;
 	}
 	
 	
-	public void createTag(Tag tag) throws SQLException {
+	public void createTag(ImgTag tag) throws SQLException {
 		
 		statement.executeUpdate("INSERT INTO tags VALUES ('" + tag.tagname + "');");
 	}
 	
 	
-	public void deleteTag(Tag tag) throws SQLException {
+	public void deleteTag(ImgTag tag) throws SQLException {
 		
 		statement.executeUpdate("DELETE FROM tags WHERE tag = '" + tag.tagname + "'");
 	}
 
 
-	public List<Tag> getTags() throws SQLException {
+	public List<ImgTag> getTags() throws SQLException {
 
 		ResultSet rs = statement.executeQuery("SELECT * FROM tags ORDER BY tag ASC");
-		List<Tag> tags = new ArrayList<Tag>();
+		List<ImgTag> tags = new ArrayList<ImgTag>();
 		while (rs.next()) {
-			Tag tag = new Tag(rs.getString("tag"));
+			ImgTag tag = new ImgTag(rs.getString("tag"));
 			tags.add(tag);
 		}
 		return tags;
 	}
 
 
-	public List<Group> getGroups() throws SQLException {
+	public List<ImgGroup> getGroups() throws SQLException {
 
 		ResultSet rs = statement.executeQuery("SELECT * FROM groups ORDER BY groupname ASC");
-		List<Group> groups = new ArrayList<Group>();
+		List<ImgGroup> groups = new ArrayList<ImgGroup>();
 		while (rs.next()) {
-			Group group = new Group(rs.getString("groupname"));
+			ImgGroup group = new ImgGroup(rs.getString("groupname"));
 			groups.add(group);
 		}
 		return groups;
 	}
 
 
-	public List<Person> getPersons() throws SQLException {
+	public List<ImgPerson> getPersons() throws SQLException {
 
 		ResultSet rs = statement.executeQuery("SELECT * FROM persons ORDER BY person ASC");
-		List<Person> persons = new ArrayList<Person>();
+		List<ImgPerson> persons = new ArrayList<ImgPerson>();
 		while (rs.next()) {
-			Person person = new Person(rs.getString("person"));
+			ImgPerson person = new ImgPerson(rs.getString("person"));
 			persons.add(person);
 		}
 		return persons;

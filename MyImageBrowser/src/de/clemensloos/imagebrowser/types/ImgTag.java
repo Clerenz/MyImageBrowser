@@ -1,18 +1,22 @@
 package de.clemensloos.imagebrowser.types;
 
-public class Group implements Comparable<Group> {
 
-	public String groupname;
-	
-	public Group (String username) {
-		this.groupname = username;
+public class ImgTag implements Comparable<ImgTag>{
+
+	public String tagname;
+
+
+	public ImgTag(String tagname) {
+		this.tagname = tagname;
 	}
+	
 	
 	@Override
 	public String toString() {
-		return this.groupname;
+		return this.tagname;
 	}
-	
+
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -20,9 +24,10 @@ public class Group implements Comparable<Group> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((groupname == null) ? 0 : groupname.toLowerCase().hashCode());
+		result = prime * result + ((tagname == null) ? 0 : tagname.toLowerCase().hashCode());
 		return result;
 	}
+
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -35,23 +40,24 @@ public class Group implements Comparable<Group> {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Group)) {
+		if (!(obj instanceof ImgTag)) {
 			return false;
 		}
-		Group other = (Group) obj;
-		if (groupname == null) {
-			if (other.groupname != null) {
+		ImgTag other = (ImgTag) obj;
+		if (tagname == null) {
+			if (other.tagname != null) {
 				return false;
 			}
-		} else if (!groupname.equalsIgnoreCase(other.groupname)) {
+		} else if (!tagname.equalsIgnoreCase(other.tagname)) {
 			return false;
 		}
 		return true;
 	}
 
+
 	@Override
-	public int compareTo(Group other) {
-		return this.groupname.compareToIgnoreCase(other.groupname);
+	public int compareTo(ImgTag other) {
+		return this.tagname.compareToIgnoreCase(other.tagname);
 	}
 
 }

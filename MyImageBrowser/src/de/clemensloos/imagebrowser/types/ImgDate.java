@@ -7,7 +7,7 @@ import java.util.Enumeration;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
-public class Date implements Comparable<Date>, MutableTreeNode{
+public class ImgDate implements Comparable<ImgDate>, MutableTreeNode{
 
 	public int year;
 	public int month;
@@ -21,7 +21,7 @@ public class Date implements Comparable<Date>, MutableTreeNode{
 	private static SimpleDateFormat sdf_day = new SimpleDateFormat("y-MM-dd");
 	private static long oneDay = 86400000l;
 	
-	public Date(String date, int numImages) {
+	public ImgDate(String date, int numImages) {
 	
 		String[] tmp = date.split("-");
 		try{
@@ -94,9 +94,9 @@ public class Date implements Comparable<Date>, MutableTreeNode{
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof Date))
+		if (!(obj instanceof ImgDate))
 			return false;
-		Date other = (Date) obj;
+		ImgDate other = (ImgDate) obj;
 		if (day != other.day)
 			return false;
 		if (month != other.month)
@@ -107,7 +107,7 @@ public class Date implements Comparable<Date>, MutableTreeNode{
 	}
 
 	@Override
-	public int compareTo(Date o) {
+	public int compareTo(ImgDate o) {
 		if(this.year < o.year){
 			return -1;
 		}

@@ -7,22 +7,22 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.clemensloos.imagebrowser.types.Date;
-import de.clemensloos.imagebrowser.types.Group;
-import de.clemensloos.imagebrowser.types.Person;
-import de.clemensloos.imagebrowser.types.Tag;
+import de.clemensloos.imagebrowser.types.ImgDate;
+import de.clemensloos.imagebrowser.types.ImgGroup;
+import de.clemensloos.imagebrowser.types.ImgPerson;
+import de.clemensloos.imagebrowser.types.ImgTag;
 
 
 public class SqlSelectBuilder {
 
 
-	private List<Tag> tags = new ArrayList<Tag>();
-	private List<Person> persons = new ArrayList<Person>();
+	private List<ImgTag> tags = new ArrayList<ImgTag>();
+	private List<ImgPerson> persons = new ArrayList<ImgPerson>();
 	private List<String> groupPersons = new ArrayList<String>();
 	private boolean wholeGroup = false;
 
 	private String event = "";
-	private List<Date> dates = new ArrayList<Date>();
+	private List<ImgDate> dates = new ArrayList<ImgDate>();
 	
 	private List<Integer> rating = new ArrayList<Integer>();
 	
@@ -45,11 +45,11 @@ public class SqlSelectBuilder {
 
 		String where = "";
 
-		for (Tag s : tags) {
+		for (ImgTag s : tags) {
 			where += " AND image_id IN (SELECT image_id FROM images_tags WHERE tag = '" + s + "')";
 		}
 
-		for (Person s : persons) {
+		for (ImgPerson s : persons) {
 			where += " AND image_id IN (SELECT image_id FROM images_persons WHERE person = '" + s + "')";
 		}
 
@@ -76,7 +76,7 @@ public class SqlSelectBuilder {
 		if (dates.size() > 0) {
 			where += " AND (";
 			String or = "";
-			for (Date d : dates) {
+			for (ImgDate d : dates) {
 				or += " OR (imagedate > " + d.longDateStart + " AND imagedate < " + d.longDateEnd + ")";
 			}
 			or = or.replaceFirst(" OR ", " ");
@@ -112,19 +112,19 @@ public class SqlSelectBuilder {
 	}
 
 
-	public void addTag(Tag tag) {
+	public void addTag(ImgTag tag) {
 		this.tags.add(tag);
 	}
 
 
-	public void removeTag(Tag tag) {
+	public void removeTag(ImgTag tag) {
 		if (this.tags.contains(tag)) {
 			this.tags.remove(tag);
 		}
 	}
 
 
-	public void setTags(List<Tag> tags) {
+	public void setTags(List<ImgTag> tags) {
 		this.tags = tags;
 	}
 
@@ -134,19 +134,19 @@ public class SqlSelectBuilder {
 	}
 
 
-	public void addPerson(Person person) {
+	public void addPerson(ImgPerson person) {
 		this.persons.add(person);
 	}
 
 
-	public void removePerson(Person person) {
+	public void removePerson(ImgPerson person) {
 		if (this.persons.contains(person)) {
 			this.persons.remove(person);
 		}
 	}
 
 
-	public void setPersons(List<Person> persons) {
+	public void setPersons(List<ImgPerson> persons) {
 		this.persons = persons;
 	}
 
@@ -156,7 +156,7 @@ public class SqlSelectBuilder {
 	}
 
 
-	public void setGroup(Group group, boolean wholeGroup) throws SQLException {
+	public void setGroup(ImgGroup group, boolean wholeGroup) throws SQLException {
 		this.wholeGroup = wholeGroup;
 		this.groupPersons.clear();
 		ResultSet rs = connection.createStatement().executeQuery(
@@ -182,21 +182,21 @@ public class SqlSelectBuilder {
 	}
 
 
-	public void addDate(Date d) {
+	public void addDate(ImgDate d) {
 		if(!dates.contains(d)) {
 			dates.add(d);			
 		}
 	}
 	
 	
-	public void removeDate(Date d) {
+	public void removeDate(ImgDate d) {
 		if(dates.contains(d)) {
 			dates.remove(d);
 		}
 	}
 
 
-	public void setDates(List<Date> dates) {
+	public void setDates(List<ImgDate> dates) {
 		clearDates();
 		this.dates = dates;
 	}
