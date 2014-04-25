@@ -4,5 +4,5 @@
 <comment>MyImageBrowser</comment>
 <entry key="last_project_folder"></entry>
 <entry key="last_project_name">myProject.sqlite</entry>
-<entry key="gui_properties_file">resources/guiProperties.xml</entry>
+<entry key="gui_properties_file">/guiProperties.xml</entry>
 </properties>

@@ -27,7 +27,7 @@ public class ImageBrowser {
 
 	private Logger log = LogManager.getLogger("de.clemensloos.myimagebrowser");
 
-	private String propertiesFile = "resources/properties.xml";
+	private String propertiesFile = "/properties.xml";
 
 	private ImageBrowserGui imageBrowserGui;
 	private SqlInterface sqlInterface;
