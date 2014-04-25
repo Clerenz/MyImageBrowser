@@ -7,12 +7,10 @@ public class SqliteImpl extends SqlInterface {
 
 	private String driver = "org.sqlite.JDBC";
 	private String urlPrefix = "jdbc:sqlite:";
-	private String projectPath;
 	private String projectName;
 	
-	public SqliteImpl(String projectPath, String projectName) {
+	public SqliteImpl(String projectName) {
 		
-		this.projectPath = projectPath;
 		this.projectName = projectName;
 		
 	}
@@ -22,7 +20,7 @@ public class SqliteImpl extends SqlInterface {
 
 		Class.forName(driver);
 		
-		String url = urlPrefix + projectPath + "\\" + projectName;
+		String url = urlPrefix + projectName + ".sqlite";
 		connection = DriverManager.getConnection(url);
 		
 		statement = connection.createStatement();

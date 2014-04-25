@@ -64,8 +64,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	public static void main(String[] args) {
 
 		try {
-//			UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
-//			UIManager.setLookAndFeel(com.jtattoo.plaf.hifi.HiFiLookAndFeel.class.getCanonicalName());
+			// UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
+			// UIManager.setLookAndFeel(com.jtattoo.plaf.hifi.HiFiLookAndFeel.class.getCanonicalName());
 			UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -187,8 +187,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 							- splitPaneVerti.getDividerSize());
 					hideBottomLabel.setText("/\\");
 					bottomPanelVisible = false;
-				}
-				else {
+				} else {
 					splitPaneVerti.setDividerLocation(splitPaneVerti.getLastDividerLocation());
 					hideBottomLabel.setText("\\/");
 					bottomPanelVisible = true;
@@ -225,8 +224,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			public void setSelectionInterval(int index0, int index1) {
 				if (tagList.isSelectedIndex(index0)) {
 					tagList.removeSelectionInterval(index0, index1);
-				}
-				else {
+				} else {
 					tagList.addSelectionInterval(index0, index1);
 				}
 				imageBrowser.setTags(tagList.getSelectedValuesList());
@@ -236,9 +234,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		tagList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(e.getButton() == MouseEvent.BUTTON3
-						&& e.getClickCount() == 1) {
-//					imageBrowser.createTag(new Tag("test")); XXX
+				if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1) {
+					// imageBrowser.createTag(new Tag("test")); XXX
 					refreshGuiComponents();
 				}
 			}
@@ -259,8 +256,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			public void setSelectionInterval(int index0, int index1) {
 				if (personList.isSelectedIndex(index0)) {
 					personList.removeSelectionInterval(index0, index1);
-				}
-				else {
+				} else {
 					personList.addSelectionInterval(index0, index1);
 				}
 				imageBrowser.setPersons(personList.getSelectedValuesList());
@@ -285,8 +281,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				if (groupList.isSelectedIndex(index0)) {
 					groupList.removeSelectionInterval(index0, index1);
 					imageBrowser.clearGroup();
-				}
-				else {
+				} else {
 					super.setSelectionInterval(index0, index1);
 					imageBrowser.setGroup(groupList.getSelectedValue(), true);
 				}
@@ -351,8 +346,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				if (leftTabbedPane.getSelectedComponent().equals(eventScrollPane)) {
 					dateTree.setSelectionInterval(-10, -1);
 					imageBrowser.clearDates();
-				}
-				else if (leftTabbedPane.getSelectedComponent().equals(dateScrollPane)) {
+				} else if (leftTabbedPane.getSelectedComponent().equals(dateScrollPane)) {
 					eventTree.setSelectionInterval(-10, -1);
 					imageBrowser.clearEvent();
 				}
@@ -369,8 +363,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 					splitPaneHoriz.setDividerLocation(hideLeftPanel.getWidth());
 					hideLeftPanel.setText(" > ");
 					leftPanelVisible = false;
-				}
-				else {
+				} else {
 					splitPaneHoriz.setDividerLocation(splitPaneHoriz.getLastDividerLocation());
 					hideLeftPanel.setText(" < ");
 					leftPanelVisible = true;
@@ -421,19 +414,25 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		Point defaultPos = new Point(-10000, -10000);
 		Point pos = guiProperties.getPropPoint("gui_frame_position", defaultPos);
+
 		if (isWindowInScreenBounds(pos, size)) {
 			frame.setSize(size.x, size.y);
 			frame.setLocation(pos);
-		}
-		else {
+		} else {
 			frame.setSize(defaultSize.x, defaultSize.y);
 			frame.setLocationByPlatform(true);
+		}
+		
+		int extendedState = guiProperties.getPropInt("gui_frame_maximized", 0);
+		if (extendedState > 0) {
+			frame.setExtendedState(extendedState);
 		}
 
 		frame.setVisible(true);
 
-		KeyboardFocusManager.getCurrentKeyboardFocusManager()
-				.addKeyEventDispatcher(new MyKeyEventDispatcher(this));
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new MyKeyEventDispatcher(this));
+		
+		refreshGuiComponents();
 
 	}
 
@@ -623,6 +622,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		guiProperties.setProp("gui_frame_size", new Point(frame.getWidth(), frame.getHeight()));
 		guiProperties.setProp("gui_frame_position", frame.getLocation());
+		guiProperties.setProp("gui_frame_maximized", frame.getExtendedState());
 
 	}
 
@@ -637,21 +637,25 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		Point myLocation = new Point(location);
 
 		if (!isLocationInScreenBounds(myLocation)) {
+			System.out.println(myLocation.toString());
 			return false;
 		}
 
-		myLocation.translate(size.x, 0);
+		myLocation.translate(size.x - 1, 0);
 		if (!isLocationInScreenBounds(myLocation)) {
+			System.out.println(myLocation.toString());
 			return false;
 		}
 
-		myLocation.translate(0, size.y);
+		myLocation.translate(0, size.y - 1);
 		if (!isLocationInScreenBounds(myLocation)) {
+			System.out.println(myLocation.toString());
 			return false;
 		}
 
-		myLocation.translate(-size.x, 0);
+		myLocation.translate(-(size.x - 1), 0);
 		if (!isLocationInScreenBounds(myLocation)) {
+			System.out.println(myLocation.toString());
 			return false;
 		}
 

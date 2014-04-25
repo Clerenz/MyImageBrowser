@@ -28,25 +28,39 @@ public class MyProperties {
 		
 		properties = new Properties();
 
-		if(create) {
-			File f = new File(propertiesFile);
-			if(!f.exists()) {
-				try {
-					f.createNewFile();
-				} catch (IOException e) {
-					// TODO
-					imageBrowser.log("Error creating " + propertiesFile + ": " + e.getMessage());
-				}
-			}
-		}
+//		if(create) {
+//			File f = new File(propertiesFile);
+//			if(!f.exists()) {
+//				try {
+//					f.createNewFile();
+//				} catch (IOException e) {
+//					// TODO
+//					imageBrowser.log("Error creating " + propertiesFile + ": " + e.getMessage());
+//				}
+//			}
+//		}
 
 		url = getClass().getResource(propertiesFile);
+		if (url == null ) {
+			File f = new File("." + propertiesFile);
+			try {
+				f.createNewFile();
+				System.out.println(f.getAbsolutePath());
+				url = getClass().getResource(propertiesFile);
+				System.out.println(url);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			imageBrowser.log("Error reading " + propertiesFile + ": File not found in classpath");
+			return;
+		}
 		try {
 			InputStream is = url.openStream();
 			properties.loadFromXML(is);
 		} catch (IOException e) {
 			// TODO
-			imageBrowser.log("Error reading " + propertiesFile + ": " + e.getMessage());
+			imageBrowser.log("Error reading " + propertiesFile + " from " + url.toString() + ": " + e.getMessage());
 		}
 	}
 

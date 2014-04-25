@@ -35,6 +35,8 @@ public class ImageBrowser {
 	private SqlSelectBuilder selectBuilder;
 
 	private MyProperties props;
+	
+	public static String projectName;
 
 
 	public ImageBrowser(ImageBrowserGui imageBrowserGui) {
@@ -44,11 +46,10 @@ public class ImageBrowser {
 		this.imageBrowserGui = imageBrowserGui;
 
 		props = new MyProperties(this, propertiesFile, false);
-		String projectFolder = props.getProp("last_project_folder");
-		String projectName = props.getProp("last_project_name");
+		projectName = props.getProp("last_project");
 
 		// sqlInterface = new HsqldbImpl(projectFolder, projectName);
-		sqlInterface = new SqliteImpl(projectFolder, projectName);
+		sqlInterface = new SqliteImpl(projectName);
 
 		try {
 			sqlInterface.connect();
@@ -238,12 +239,13 @@ public class ImageBrowser {
 		selectBuilder.clearDates();
 	}
 	
-	public void removeRating(Integer i) {
-		selectBuilder.removeRating(i);
-	}
-	
 	public void addRating(Integer i) {
 		selectBuilder.addRating(i);
+	}
+
+
+	public void removeRating(Integer i) {
+		selectBuilder.removeRating(i);
 	}
 
 }
