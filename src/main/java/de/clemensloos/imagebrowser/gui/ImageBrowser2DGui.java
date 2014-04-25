@@ -72,7 +72,6 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		}
 
 		SwingUtilities.invokeLater(new Runnable() {
-			@SuppressWarnings("unused")
 			@Override
 			public void run() {
 				new ImageBrowser2DGui();
