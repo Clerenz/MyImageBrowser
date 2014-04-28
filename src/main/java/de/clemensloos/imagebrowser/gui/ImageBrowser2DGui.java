@@ -46,7 +46,6 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
-import de.clemensloos.imagebrowser.MyProperties;
 import de.clemensloos.imagebrowser.types.ImgDate;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
 import de.clemensloos.imagebrowser.types.ImgEvent;
@@ -54,6 +53,7 @@ import de.clemensloos.imagebrowser.types.ImgGroup;
 import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgPerson;
 import de.clemensloos.imagebrowser.types.ImgTag;
+import de.clemensloos.imagebrowser.utils.MyProperties;
 
 
 public class ImageBrowser2DGui implements ImageBrowserGui {
@@ -500,7 +500,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				int y = gap + (row * (diameter + gap));
 				for (int col = 0; col < columns; col++) {
 					int x = gap + (col * (diameter + gap));
-					mainPanel.add(new ImagePanel(images.get(i), x, y, diameter));
+					mainPanel.add(new ImagePanel(images.get(i), x, y, diameter, i));
 					i++;
 					if (i == images.size()) {
 						break;

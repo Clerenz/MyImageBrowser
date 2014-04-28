@@ -18,6 +18,7 @@ import javax.swing.SwingWorker;
 import net.coobird.thumbnailator.Thumbnails;
 import de.clemensloos.imagebrowser.ImageBrowser;
 import de.clemensloos.imagebrowser.types.Image;
+import de.clemensloos.imagebrowser.utils.ThreadPooler;
 
 
 public class ImagePanel extends JPanel {
@@ -36,6 +37,7 @@ public class ImagePanel extends JPanel {
 	String realImgPath;
 	int thumbSize;
 	BufferedImage bi = null;
+	int position;
 
 	int imagePosX = 0;
 	int imagePosY = 0;
@@ -43,11 +45,12 @@ public class ImagePanel extends JPanel {
 	int imageSizeY = 0;
 
 
-	public ImagePanel(Image image, int x, int y, int diameter) {
+	public ImagePanel(Image image, int x, int y, int diameter, int position) {
 
 		super();
 
 		this.image = image;
+		this.position = position;
 
 		Dimension d = new Dimension(diameter, diameter);
 		setSize(d);
@@ -115,7 +118,9 @@ public class ImagePanel extends JPanel {
 		protected Integer doInBackground() throws Exception {
 
 			try {
-
+				
+				ThreadPooler.aquire(position, ImagePanel.this, true);
+				
 				File thumb = new File(realImgPath);
 				if (thumb.exists()) {
 					bi = ImageIO.read(thumb);
@@ -126,7 +131,11 @@ public class ImagePanel extends JPanel {
 							.of(bi)
 							.size(thumbSize, thumbSize)
 							.toFile(realImgPath);
+					bi = ImageIO.read(thumb);
 				}
+				
+				ThreadPooler.release();
+				
 			} catch (IOException ex) {
 				// TODO
 				ex.printStackTrace();

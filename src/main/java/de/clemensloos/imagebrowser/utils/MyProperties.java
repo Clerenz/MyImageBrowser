@@ -1,4 +1,4 @@
-package de.clemensloos.imagebrowser;
+package de.clemensloos.imagebrowser.utils;
 
 
 import java.awt.Point;
@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
+
+import de.clemensloos.imagebrowser.ImageBrowser;
 
 
 public class MyProperties {

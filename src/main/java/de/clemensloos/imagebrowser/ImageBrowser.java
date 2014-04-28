@@ -21,6 +21,7 @@ import de.clemensloos.imagebrowser.types.ImgGroup;
 import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgPerson;
 import de.clemensloos.imagebrowser.types.ImgTag;
+import de.clemensloos.imagebrowser.utils.MyProperties;
 
 
 public class ImageBrowser {

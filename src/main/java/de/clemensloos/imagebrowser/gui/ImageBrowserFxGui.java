@@ -23,8 +23,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.RegionBuilder;
 import javafx.stage.Stage;
 import de.clemensloos.imagebrowser.ImageBrowser;
-import de.clemensloos.imagebrowser.MyProperties;
 import de.clemensloos.imagebrowser.types.ImgEvent;
+import de.clemensloos.imagebrowser.utils.MyProperties;
 
 public class ImageBrowserFxGui extends Application implements ImageBrowserGui {
 	
