@@ -19,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -69,8 +70,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		try {
 			// UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
-			// UIManager.setLookAndFeel(com.jtattoo.plaf.hifi.HiFiLookAndFeel.class.getCanonicalName());
-			UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
+			UIManager.setLookAndFeel(com.jtattoo.plaf.hifi.HiFiLookAndFeel.class.getCanonicalName());
+			// UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -86,6 +87,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 	ImageBrowser imageBrowser;
 
+	List<ImagePanel> loadedImages = new ArrayList<ImagePanel>();
 
 	ImageBrowser2DGui() {
 
@@ -210,13 +212,13 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		zoomThumbsIn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(columnsOfImages > 2) {
+				if (columnsOfImages > 2) {
 					columnsOfImages--;
 				}
-				if(columnsOfImages <= 2) {
+				if (columnsOfImages <= 2) {
 					zoomThumbsIn.setEnabled(false);
 				}
-				if(columnsOfImages < 10) {
+				if (columnsOfImages < 10) {
 					zoomThumbsOut.setEnabled(true);
 				}
 				loadImages();
@@ -543,12 +545,25 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		int diameter = (width - ((columnsOfImages + 1) * gap)) / columnsOfImages;
 
 		List<Image> images = imageBrowser.getImages();
+		List<ImagePanel> newList = new ArrayList<ImagePanel>(); 
 		if (images.size() > 0) {
 			for (row = 0; row < Integer.MAX_VALUE; row++) {
 				int y = gap + (row * (diameter + gap));
 				for (int col = 0; col < columnsOfImages; col++) {
 					int x = gap + (col * (diameter + gap));
-					mainPanel.add(new ImagePanel(images.get(i), x, y, diameter, i));
+					
+					ImagePanel panel;
+					if(loadedImages.contains(images.get(i))) {
+						panel = loadedImages.remove(loadedImages.indexOf(images.get(i)));
+						panel.refresh(images.get(i), x, y, diameter);
+					}
+					else {
+						panel = new ImagePanel(images.get(i), x, y, diameter);
+					}
+					newList.add(panel);
+					
+
+					mainPanel.add(panel);
 					i++;
 					if (i == images.size()) {
 						break;
@@ -561,6 +576,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			Dimension d = new Dimension(width, (row + 1) * (diameter + gap) + gap);
 			mainPanel.setPreferredSize(d);
 		}
+		
+		loadedImages.clear();
+		loadedImages.addAll(newList);
 
 		scrollPane.validate();
 		scrollPane.repaint();

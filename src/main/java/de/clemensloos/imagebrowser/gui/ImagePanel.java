@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
@@ -28,29 +29,29 @@ public class ImagePanel extends JPanel {
 	static final int THUMB_SMA = 250;
 	static final int THUMB_MED = 500;
 	static final int THUMB_MAX = 1000;
-	
 
 	Image image;
 
 	String realImgPath;
 	int thumbSize;
+	boolean sizeChanged = false;
 	BufferedImage bi = null;
-	int position;
 
 	int imagePosX = 0;
 	int imagePosY = 0;
 	int imageSizeX = 0;
 	int imageSizeY = 0;
-	
+
 	private ImageWorker imageWorker = new ImageWorker();
 
+	JButton tagImageButton;
 
-	public ImagePanel(Image image, int x, int y, int diameter, int position) {
+
+	public ImagePanel(Image image, int x, int y, int diameter) {
 
 		super();
 
 		this.image = image;
-		this.position = position;
 
 		Dimension d = new Dimension(diameter, diameter);
 		setSize(d);
@@ -99,6 +100,34 @@ public class ImagePanel extends JPanel {
 		selectImageSizing();
 
 		imageWorker.execute();
+
+		tagImageButton = new JButton("...");
+		add(tagImageButton);
+	}
+
+
+	public void refresh(Image image, int x, int y, int diameter) {
+
+		this.image = image;
+
+		Dimension d = new Dimension(diameter, diameter);
+		setSize(d);
+		setMaximumSize(d);
+		setMinimumSize(d);
+		setPreferredSize(d);
+		setForeground(Color.white);
+		setBackground(Color.black);
+		setOpaque(true);
+
+		setBounds(x, y, diameter, diameter);
+		
+		
+		calcImageSizes();
+
+		selectImageSizing();
+
+		imageWorker.execute();
+
 	}
 
 
@@ -113,26 +142,29 @@ public class ImagePanel extends JPanel {
 
 
 	public class ImageWorker extends SwingWorker<Integer, Integer> {
-		
+
 		@Override
 		protected Integer doInBackground() throws Exception {
-			
+
 			try {
-				
-				File thumb = new File(realImgPath);
-				if (thumb.exists()) {
-					bi = ImageIO.read(thumb);
+
+				if (bi == null || sizeChanged) {
+					File thumb = new File(realImgPath);
+					if (thumb.exists()) {
+						bi = ImageIO.read(thumb);
+					}
+					else {
+						bi = ImageIO.read(new File(image.filepath + "\\" + image.filename));
+						Thumbnails
+								.of(bi)
+								.size(thumbSize, thumbSize)
+								.toFile(realImgPath);
+						bi = ImageIO.read(thumb);
+					}
+					
+					sizeChanged = false;
 				}
-				else {
-					bi = ImageIO.read(new File(image.filepath + "\\" + image.filename));
-					Thumbnails
-							.of(bi)
-							.size(thumbSize, thumbSize)
-							.toFile(realImgPath);
-					bi = ImageIO.read(thumb);
-				}
-				
-				
+
 			} catch (IOException ex) {
 				// TODO
 				ex.printStackTrace();
@@ -143,9 +175,9 @@ public class ImagePanel extends JPanel {
 
 		@Override
 		protected void done() {
-			
+
 			ImagePanel.this.repaint();
-			
+
 		}
 
 	}
@@ -175,6 +207,8 @@ public class ImagePanel extends JPanel {
 
 
 	private void selectImageSizing() {
+		
+		int oldValue = thumbSize;
 
 		if (imageSizeX < THUMB_MIN && imageSizeY < THUMB_MIN) {
 			realImgPath = ImageBrowser.projectName + "\\thumbs\\" + image.image_id + "_" + THUMB_MIN + ".jpg";
@@ -192,7 +226,35 @@ public class ImagePanel extends JPanel {
 			realImgPath = ImageBrowser.projectName + "\\thumbs\\" + image.image_id + "_" + THUMB_MAX + ".jpg";
 			thumbSize = THUMB_MAX;
 		}
+		
+		if (thumbSize != oldValue) {
+			sizeChanged = true;
+		}
 
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+
+		if (obj instanceof Image) {
+			if (image.equals((Image) obj)) {
+				return true;
+			}
+		}
+
+		if (!(obj instanceof ImagePanel)) {
+			return false;
+		}
+
+		ImagePanel other = (ImagePanel) obj;
+		return image.equals(other.image);
 	}
 
 }
