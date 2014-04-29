@@ -7,6 +7,10 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -46,11 +50,11 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
-import de.clemensloos.imagebrowser.types.ImgDate;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
+import de.clemensloos.imagebrowser.types.Image;
+import de.clemensloos.imagebrowser.types.ImgDate;
 import de.clemensloos.imagebrowser.types.ImgEvent;
 import de.clemensloos.imagebrowser.types.ImgGroup;
-import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgPerson;
 import de.clemensloos.imagebrowser.types.ImgTag;
 import de.clemensloos.imagebrowser.utils.MyProperties;
@@ -106,6 +110,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	}
 
 
+	int columnsOfImages = 4;
+
 	// MAIN AREA
 	JPanel mainPanel;
 	JScrollPane scrollPane;
@@ -118,6 +124,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	JButton ratingNorm;
 	JButton ratingUp;
 	JLabel hideBottomLabel;
+	JButton zoomThumbsOut;
+	JButton zoomThumbsIn;
 	boolean bottomPanelVisible = true;
 
 	DefaultListModel<ImgTag> tagListModel;
@@ -169,12 +177,51 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
+		scrollPane.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+				loadImages();
+			}
+		});
 
 		// BUILD LOWER AREA ==================================================
 
 		ratingDown = new RatingButton(this, -1);
 		ratingNorm = new RatingButton(this, 0);
 		ratingUp = new RatingButton(this, 1);
+
+		zoomThumbsOut = new JButton("-");
+		zoomThumbsOut.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (columnsOfImages < 10) {
+					columnsOfImages++;
+				}
+				if (columnsOfImages >= 10) {
+					zoomThumbsOut.setEnabled(false);
+				}
+				if (columnsOfImages > 2) {
+					zoomThumbsIn.setEnabled(true);
+				}
+				loadImages();
+			}
+		});
+		zoomThumbsIn = new JButton("+");
+		zoomThumbsIn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(columnsOfImages > 2) {
+					columnsOfImages--;
+				}
+				if(columnsOfImages <= 2) {
+					zoomThumbsIn.setEnabled(false);
+				}
+				if(columnsOfImages < 10) {
+					zoomThumbsOut.setEnabled(true);
+				}
+				loadImages();
+			}
+		});
 
 		hideBottomLabel = new JLabel("\\/");
 		hideBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -197,10 +244,10 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		hideBottomPanel = new JPanel();
 		// hideBottomPanel = new FormDebugPanel();
 
-		String columnSpecs = "3dlu, pref, 3dlu, pref, 3dlu, pref, pref:GROW";
+		String columnSpecs = "3dlu, pref, 3dlu, pref, 3dlu, pref, pref:GROW, pref, 3dlu, pref, 3dlu";
 		String rowSpecs = "pref";
 		FormLayout layout = new FormLayout(columnSpecs, rowSpecs);
-		layout.setColumnGroups(new int[][] { { 2, 4, 6 } });
+		layout.setColumnGroups(new int[][] { { 2, 4, 6, 8, 10 } });
 		hideBottomPanel.setLayout(layout);
 
 		PanelBuilder builder = new PanelBuilder(layout, hideBottomPanel);
@@ -210,6 +257,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		builder.add(ratingNorm, cc.xy(4, 1));
 		builder.add(ratingUp, cc.xy(6, 1));
 		builder.add(hideBottomLabel, cc.xy(7, 1));
+		builder.add(zoomThumbsOut, cc.xy(8, 1));
+		builder.add(zoomThumbsIn, cc.xy(10, 1));
 
 		tagListModel = new DefaultListModel<ImgTag>();
 		tagList = new JList<ImgTag>(tagListModel);
@@ -422,7 +471,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			frame.setSize(defaultSize.x, defaultSize.y);
 			frame.setLocationByPlatform(true);
 		}
-		
+
 		int extendedState = guiProperties.getPropInt("gui_frame_maximized", 0);
 		if (extendedState > 0) {
 			frame.setExtendedState(extendedState);
@@ -431,7 +480,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		frame.setVisible(true);
 
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new MyKeyEventDispatcher(this));
-		
+
 		refreshGuiComponents();
 
 	}
@@ -489,16 +538,15 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		mainPanel.removeAll();
 		int i = 0;
 		int row = 0;
-		int columns = 4;
-		int width = mainPanel.getWidth();
+		int width = scrollPane.getWidth() - 17;
 		int gap = 4;
-		int diameter = (width - ((columns + 1) * gap)) / columns;
+		int diameter = (width - ((columnsOfImages + 1) * gap)) / columnsOfImages;
 
 		List<Image> images = imageBrowser.getImages();
 		if (images.size() > 0) {
 			for (row = 0; row < Integer.MAX_VALUE; row++) {
 				int y = gap + (row * (diameter + gap));
-				for (int col = 0; col < columns; col++) {
+				for (int col = 0; col < columnsOfImages; col++) {
 					int x = gap + (col * (diameter + gap));
 					mainPanel.add(new ImagePanel(images.get(i), x, y, diameter, i));
 					i++;

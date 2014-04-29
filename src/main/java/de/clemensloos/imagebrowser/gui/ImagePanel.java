@@ -18,7 +18,6 @@ import javax.swing.SwingWorker;
 import net.coobird.thumbnailator.Thumbnails;
 import de.clemensloos.imagebrowser.ImageBrowser;
 import de.clemensloos.imagebrowser.types.Image;
-import de.clemensloos.imagebrowser.utils.ThreadPooler;
 
 
 public class ImagePanel extends JPanel {
@@ -30,7 +29,6 @@ public class ImagePanel extends JPanel {
 	static final int THUMB_MED = 500;
 	static final int THUMB_MAX = 1000;
 	
-//	static boolean resized = false; XXX
 
 	Image image;
 
@@ -43,6 +41,8 @@ public class ImagePanel extends JPanel {
 	int imagePosY = 0;
 	int imageSizeX = 0;
 	int imageSizeY = 0;
+	
+	private ImageWorker imageWorker = new ImageWorker();
 
 
 	public ImagePanel(Image image, int x, int y, int diameter, int position) {
@@ -98,7 +98,7 @@ public class ImagePanel extends JPanel {
 
 		selectImageSizing();
 
-		new ImageWorker().execute();
+		imageWorker.execute();
 	}
 
 
@@ -113,13 +113,11 @@ public class ImagePanel extends JPanel {
 
 
 	public class ImageWorker extends SwingWorker<Integer, Integer> {
-
+		
 		@Override
 		protected Integer doInBackground() throws Exception {
-
+			
 			try {
-				
-				ThreadPooler.aquire(position, ImagePanel.this, true);
 				
 				File thumb = new File(realImgPath);
 				if (thumb.exists()) {
@@ -134,7 +132,6 @@ public class ImagePanel extends JPanel {
 					bi = ImageIO.read(thumb);
 				}
 				
-				ThreadPooler.release();
 				
 			} catch (IOException ex) {
 				// TODO
@@ -146,7 +143,9 @@ public class ImagePanel extends JPanel {
 
 		@Override
 		protected void done() {
+			
 			ImagePanel.this.repaint();
+			
 		}
 
 	}
