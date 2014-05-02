@@ -37,7 +37,7 @@ public class MyGlassPane extends JPanel implements MouseListener, KeyListener {
 		label = new JLabel();
 		label.setBackground(Color.black);
 		label.setForeground(Color.white);
-		label.setBorder(BorderFactory.createLineBorder(Color.black, 5, true));
+		label.setBorder(BorderFactory.createLineBorder(Color.black, 5, false));
 		label.setOpaque(true);
 		
 		builder.add(label,  cc.xy(2, 3));
@@ -59,7 +59,7 @@ public class MyGlassPane extends JPanel implements MouseListener, KeyListener {
 		for (int i=100; i>0; i--) {
 			label.setForeground(new Color(1, 1, 1, (float)i / 100f));
 			label.setBackground(new Color(0, 0, 0, (float)i / 100f));
-			label.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, (float)i / 100f), 5, true));
+			label.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, (float)i / 100f), 5, false));
 			try {
 				Thread.sleep(5);
 			} catch (InterruptedException e) {
