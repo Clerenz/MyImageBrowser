@@ -31,6 +31,7 @@ public class Image extends JPanel implements Comparable<Image> {
 	public int imageheight = 1;
 
 	public int imagerating = 0;
+	public boolean selected = false;
 
 	public Image(File f) throws ImageProcessingException, IOException {
 

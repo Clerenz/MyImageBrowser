@@ -290,5 +290,23 @@ public class ImageBrowserFxGui extends Application implements ImageBrowserGui {
 		}
 		return false;
 	}
+
+	@Override
+	public void deselectAll() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void refreshGuiComponents() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showUserMessage(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

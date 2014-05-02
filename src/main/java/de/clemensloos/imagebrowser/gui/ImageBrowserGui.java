@@ -11,4 +11,10 @@ public interface ImageBrowserGui {
 	
 	public abstract void shutDown();
 	
+	public abstract void deselectAll();
+	
+	public void refreshGuiComponents();
+	
+	public void showUserMessage(String message);
+	
 }

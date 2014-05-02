@@ -521,6 +521,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	}
 
 
+	@Override
 	public void refreshGuiComponents() {
 
 		loadImages();
@@ -558,7 +559,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 						panel.refresh(images.get(i), x, y, diameter);
 					}
 					else {
-						panel = new ImagePanel(images.get(i), x, y, diameter);
+						panel = new ImagePanel(this, images.get(i), x, y, diameter);
 					}
 					newList.add(panel);
 					
@@ -582,6 +583,14 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		scrollPane.validate();
 		scrollPane.repaint();
+	}
+	
+	
+	@Override
+	public void deselectAll() {
+		for (ImagePanel ip : loadedImages) {
+			ip.deselect();
+		}
 	}
 
 

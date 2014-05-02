@@ -4,6 +4,8 @@ package de.clemensloos.imagebrowser.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -43,15 +45,18 @@ public class ImagePanel extends JPanel {
 	int imageSizeY = 0;
 
 	private ImageWorker imageWorker = new ImageWorker();
+	private ImageBrowserGui gui;
 
 	JButton tagImageButton;
 
 
-	public ImagePanel(Image image, int x, int y, int diameter) {
-
+	public ImagePanel(ImageBrowserGui g, Image i, int x, int y, int diameter) {
+		
 		super();
+		
+		this.gui = g;
 
-		this.image = image;
+		this.image = i;
 
 		Dimension d = new Dimension(diameter, diameter);
 		setSize(d);
@@ -65,6 +70,9 @@ public class ImagePanel extends JPanel {
 		setBounds(x, y, diameter, diameter);
 
 		setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+		if(image.selected) {
+			setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+		}
 
 		addMouseListener(new MouseListener() {
 
@@ -80,18 +88,35 @@ public class ImagePanel extends JPanel {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+				if(!contains(e.getPoint())) {
+					setBackground(Color.BLACK);
+					tagImageButton.setVisible(false);
+				}
 			}
 
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+				setBackground(Color.DARK_GRAY);
+				tagImageButton.setVisible(true);
 			}
 
 
-			@Override
+			@Override //TODO!!!
 			public void mouseClicked(MouseEvent e) {
+				if (e.isControlDown()) {
+					image.selected = !image.selected;
+				}
+				else if(!image.selected){
+					gui.deselectAll();
+					image.selected = true;
+				}
+				if(image.selected) {
+					setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+				}
+				else {
+					setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+				}
 			}
 		});
 
@@ -100,9 +125,20 @@ public class ImagePanel extends JPanel {
 		selectImageSizing();
 
 		imageWorker.execute();
+		
+		
+		
+		
 
 		tagImageButton = new JButton("...");
+		tagImageButton.addActionListener(new ActionListener() { // TODO
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				gui.showUserMessage("click");
+			}
+		});
 		add(tagImageButton);
+		tagImageButton.setVisible(false);
 	}
 
 
@@ -133,6 +169,7 @@ public class ImagePanel extends JPanel {
 
 	@Override
 	protected void paintComponent(Graphics g) {
+
 		super.paintComponent(g);
 		if (bi != null) {
 			g.drawImage(bi, imagePosX, imagePosY, imageSizeX, imageSizeY, 0, 0,
@@ -203,6 +240,12 @@ public class ImagePanel extends JPanel {
 			imageSizeY += imagePosY;
 		}
 
+	}
+	
+	
+	public void deselect() {
+		image.selected = false;
+		setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
 	}
 
 
