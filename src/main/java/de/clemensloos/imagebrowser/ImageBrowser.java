@@ -32,11 +32,11 @@ public class ImageBrowser {
 
 	private ImageBrowserGui imageBrowserGui;
 	private SqlInterface sqlInterface;
-	
+
 	private SqlSelectBuilder selectBuilder;
 
 	private MyProperties props;
-	
+
 	public static String projectName;
 
 
@@ -66,16 +66,16 @@ public class ImageBrowser {
 		}
 
 		sqlInterface.checkTablesExist();
-		
+
 		selectBuilder = new SqlSelectBuilder(sqlInterface.getConnection());
-		
+
 	}
 
 
 	public List<Image> getImages() {
 
 		try {
-			return sqlInterface.getImages( selectBuilder.build() );
+			return sqlInterface.getImages(selectBuilder.build());
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
 			return null;
@@ -92,10 +92,10 @@ public class ImageBrowser {
 			return null;
 		}
 	}
-	
-	
+
+
 	public List<ImgEvent> getEvents() {
-		
+
 		try {
 			return sqlInterface.getEvents();
 		} catch (SQLException e) {
@@ -112,8 +112,8 @@ public class ImageBrowser {
 			log.error(e.getMessage(), e);
 		}
 	}
-	
-	
+
+
 	public void deleteTag(ImgTag tag) {
 		try {
 			sqlInterface.deleteTag(tag);
@@ -121,8 +121,17 @@ public class ImageBrowser {
 			log.error(e.getMessage(), e);
 		}
 	}
-	
-	
+
+
+	public void createEvent(ImgEvent event) {
+		try {
+			sqlInterface.createEvent(event);
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+
 	public List<ImgTag> getTags() {
 
 		try {
@@ -196,21 +205,25 @@ public class ImageBrowser {
 
 		return props.getProp(key);
 	}
-	
+
+
 	// SQL SELECT BUILDER =====================================================
-	
+
 	public void setTags(List<ImgTag> tags) {
 		selectBuilder.setTags(tags);
 	}
-	
+
+
 	public void setPersons(List<ImgPerson> persons) {
 		selectBuilder.setPersons(persons);
 	}
-	
+
+
 	public void clearGroup() {
 		selectBuilder.clearGroup();
 	}
-	
+
+
 	public void setGroup(ImgGroup group, boolean wholeGroup) {
 		try {
 			selectBuilder.setGroup(group, wholeGroup);
@@ -219,27 +232,33 @@ public class ImageBrowser {
 			e.printStackTrace();
 		}
 	}
-	
+
+
 	public void setEvent(String event) {
 		selectBuilder.setEvent(event);
 	}
-	
+
+
 	public void clearEvent() {
 		selectBuilder.clearEvent();
 	}
-	
+
+
 	public void addDate(ImgDate d) {
-		selectBuilder.addDate(d);					
+		selectBuilder.addDate(d);
 	}
-	
+
+
 	public void removeDate(ImgDate d) {
-		selectBuilder.removeDate(d);					
+		selectBuilder.removeDate(d);
 	}
-		
+
+
 	public void clearDates() {
 		selectBuilder.clearDates();
 	}
-	
+
+
 	public void addRating(Integer i) {
 		selectBuilder.addRating(i);
 	}

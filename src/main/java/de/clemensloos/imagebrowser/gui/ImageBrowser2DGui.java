@@ -45,12 +45,14 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
+import de.clemensloos.imagebrowser.gui.dialog.EventDialog;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
 import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgDate;
@@ -71,7 +73,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		try {
 			// UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
 			UIManager.setLookAndFeel(com.jtattoo.plaf.hifi.HiFiLookAndFeel.class.getCanonicalName());
-			// UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
+//			 UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -88,6 +90,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	ImageBrowser imageBrowser;
 
 	List<ImagePanel> loadedImages = new ArrayList<ImagePanel>();
+
 
 	ImageBrowser2DGui() {
 
@@ -376,15 +379,34 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		// BUILD LEFT AREA ===================================================
 
-		eventRootNode = new DefaultMutableTreeNode("Events");
+		eventRootNode = new DefaultMutableTreeNode("Add Event ...");
+//		eventRootNode.
 		eventTreeModel = new DefaultTreeModel(eventRootNode, true);
 		eventTree = new JTree(eventTreeModel);
 		eventTree.setSelectionModel(new EventTreeSelectionModel(this));
+		eventTree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					TreePath selPath = eventTree.getPathForLocation(e.getX(), e.getY());
+					if (selPath != null && selPath.getLastPathComponent().equals(eventRootNode)) {
+						eventTree.expandPath(new TreePath(eventRootNode.getPath()));
+						EventDialog ed = new EventDialog(frame);
+						ImgEvent ie = ed.getImgEvent();
+						if (ie != null) {
+							imageBrowser.createEvent(ie);
+							buildEventTree();
+						}
+					}
+				}
+			}
+		});
 		eventScrollPane = new JScrollPane(eventTree);
 
 		dateRootNode = new DateTreeHelper("Dates");
 		dateTreeModel = new DefaultTreeModel(dateRootNode, true);
 		dateTree = new JTree(dateTreeModel);
+//		dateTree.setRootVisible(false);
 		dateTree.setSelectionModel(new DateTreeSelectionModel(this));
 		dateScrollPane = new JScrollPane(dateTree);
 
@@ -546,15 +568,15 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		int diameter = (width - ((columnsOfImages + 1) * gap)) / columnsOfImages;
 
 		List<Image> images = imageBrowser.getImages();
-		List<ImagePanel> newList = new ArrayList<ImagePanel>(); 
+		List<ImagePanel> newList = new ArrayList<ImagePanel>();
 		if (images.size() > 0) {
 			for (row = 0; row < Integer.MAX_VALUE; row++) {
 				int y = gap + (row * (diameter + gap));
 				for (int col = 0; col < columnsOfImages; col++) {
 					int x = gap + (col * (diameter + gap));
-					
+
 					ImagePanel panel;
-					if(loadedImages.contains(images.get(i))) {
+					if (loadedImages.contains(images.get(i))) {
 						panel = loadedImages.remove(loadedImages.indexOf(images.get(i)));
 						panel.refresh(images.get(i), x, y, diameter);
 					}
@@ -562,7 +584,6 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 						panel = new ImagePanel(this, images.get(i), x, y, diameter);
 					}
 					newList.add(panel);
-					
 
 					mainPanel.add(panel);
 					i++;
@@ -577,15 +598,15 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			Dimension d = new Dimension(width, (row + 1) * (diameter + gap) + gap);
 			mainPanel.setPreferredSize(d);
 		}
-		
+
 		loadedImages.clear();
 		loadedImages.addAll(newList);
 
 		scrollPane.validate();
 		scrollPane.repaint();
 	}
-	
-	
+
+
 	@Override
 	public void deselectAll() {
 		for (ImagePanel ip : loadedImages) {

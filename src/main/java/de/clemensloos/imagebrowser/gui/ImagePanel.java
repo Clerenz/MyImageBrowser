@@ -18,6 +18,10 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
 import net.coobird.thumbnailator.Thumbnails;
 import de.clemensloos.imagebrowser.ImageBrowser;
 import de.clemensloos.imagebrowser.types.Image;
@@ -126,9 +130,6 @@ public class ImagePanel extends JPanel {
 
 		imageWorker.execute();
 		
-		
-		
-		
 
 		tagImageButton = new JButton("...");
 		tagImageButton.addActionListener(new ActionListener() { // TODO
@@ -137,8 +138,20 @@ public class ImagePanel extends JPanel {
 				gui.showUserMessage("click");
 			}
 		});
-		add(tagImageButton);
 		tagImageButton.setVisible(false);
+		
+		
+		String columnSpecs = "3dlu, pref, 3dlu, pref:GROW, 3dlu, pref, 3dlu";
+		String rowSpecs = "3dlu, pref, 3dlu, pref:GROW, 3dlu, pref, 3dlu";
+		FormLayout layout = new FormLayout(columnSpecs, rowSpecs);
+		layout.setColumnGroups(new int[][] { { 2, 6 } });
+		layout.setRowGroups(new int[][] { { 2, 6 } });
+		setLayout(layout);
+		
+		PanelBuilder builder = new PanelBuilder(layout, this);
+		CellConstraints cc = new CellConstraints();
+		
+		builder.add(tagImageButton, cc.xy(6, 6));
 	}
 
 

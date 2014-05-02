@@ -31,6 +31,9 @@ public class Image extends JPanel implements Comparable<Image> {
 	public int imageheight = 1;
 
 	public int imagerating = 0;
+	
+	public String checksum = "NA";
+	
 	public boolean selected = false;
 
 	public Image(File f) throws ImageProcessingException, IOException {
@@ -55,6 +58,8 @@ public class Image extends JPanel implements Comparable<Image> {
 		imageheight = rs.getInt("imageheight");
 
 		imagerating = rs.getInt("imagerating");
+		
+		checksum = rs.getString("checksum");
 
 	}
 

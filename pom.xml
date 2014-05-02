@@ -78,5 +78,10 @@
 			<artifactId>thumbnailator</artifactId>
 			<version>0.4.7</version>
 		</dependency>
+		<dependency>
+			<groupId>org.swinglabs</groupId>
+			<artifactId>swingx</artifactId>
+			<version>1.6.1</version>
+		</dependency>
 	</dependencies>
 </project>

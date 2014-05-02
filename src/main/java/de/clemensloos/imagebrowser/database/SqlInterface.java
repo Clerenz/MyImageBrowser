@@ -7,14 +7,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
+import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgDate;
 import de.clemensloos.imagebrowser.types.ImgEvent;
 import de.clemensloos.imagebrowser.types.ImgGroup;
-import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgPerson;
 import de.clemensloos.imagebrowser.types.ImgTag;
 
@@ -70,6 +68,7 @@ public abstract class SqlInterface {
 
 		String s = createSqlInsert(image);
 
+		System.out.println(s);
 		statement.execute(s);
 
 		addImageDate(image);
@@ -124,17 +123,13 @@ public abstract class SqlInterface {
 	}
 
 
-	public void addEvent() throws SQLException {
+	public void createEvent(ImgEvent event) throws SQLException {
 
-		String event = "Third Event";
-		
-		Calendar c = new GregorianCalendar();
-		c.set(2013, 0, 1, 0, 0, 0);
-		long start = c.getTimeInMillis();
-		c.set(2013, 11, 31, 23, 59, 59);
-		long end = c.getTimeInMillis();
-
-		statement.execute("INSERT INTO events VALUES ('" + event + "', " + start + ", " + end + ")");
+		statement.execute("INSERT INTO events VALUES ('"
+				+ event.eventname
+				+ "', null, "
+				+ event.eventstart + ", "
+				+ event.eventend + ")");
 
 	}
 
@@ -233,7 +228,8 @@ public abstract class SqlInterface {
 //				"'" + sdf.format(image.imagedate) + "', " +
 				image.imagewidth + ", " +
 				image.imageheight + ", " +
-				image.imagerating + " );";
+				image.imagerating + ", " +
+				"'" + image.checksum + "' );";
 		return sql;
 
 	}
@@ -273,28 +269,30 @@ public abstract class SqlInterface {
 				"imagewidth SMALLINT, " +
 				"imageheight SMALLINT, " +
 				"imagerating TINYINT DEFAULT 0, " +
+				"checksum VARCHAR(255), " +
 				"PRIMARY KEY (image_id));");
 
-		statement.addBatch("CREATE TABLE tags ( tag VARCHAR(50) NOT NULL, PRIMARY KEY (tag));");
-		statement.addBatch("CREATE TABLE persons ( person VARCHAR(50) NOT NULL, PRIMARY KEY (person));");
-		statement.addBatch("CREATE TABLE groups ( groupname VARCHAR(50) NOT NULL, PRIMARY KEY (groupname));");
+		statement.addBatch("CREATE TABLE tags ( tag VARCHAR(50) NOT NULL UNIQUE, tag_id INTEGER NOT NULL, PRIMARY KEY (tag_id));");
+		statement.addBatch("CREATE TABLE persons ( person VARCHAR(50) NOT NULL UNIQUE, person_id INTEGER NOT NULL, PRIMARY KEY (person_id));");
+		statement.addBatch("CREATE TABLE groups ( groupname VARCHAR(50) NOT NULL UNIQUE, group_id INTEGER NOT NULL, PRIMARY KEY (group_id));");
 
-		statement.addBatch("CREATE TABLE images_tags ( image_id INTEGER, tag VARCHAR(50), " +
+		statement.addBatch("CREATE TABLE images_tags ( image_id INTEGER, tag_id INTEGER, " +
 				"FOREIGN KEY (image_id) REFERENCES images(image_id) on delete cascade on update restrict, " +
-				"FOREIGN KEY (tag) REFERENCES tags(tag) on delete cascade on update cascade);");
+				"FOREIGN KEY (tag_id) REFERENCES tags(tag_id) on delete cascade on update cascade);");
 
-		statement.addBatch("CREATE TABLE images_persons ( image_id INTEGER, person VARCHAR(50), " +
+		statement.addBatch("CREATE TABLE images_persons ( image_id INTEGER, person_id INTEGER, " +
 				"FOREIGN KEY (image_id) REFERENCES images(image_id) on delete cascade on update restrict, " +
-				"FOREIGN KEY (person) REFERENCES persons(person) on delete cascade on update cascade);");
+				"FOREIGN KEY (person_id) REFERENCES persons(person_id) on delete cascade on update cascade);");
 
-		statement.addBatch("CREATE TABLE groups_persons ( groupname VARCHAR(50), person VARCHAR(50), " +
-				"FOREIGN KEY (groupname) REFERENCES groups(groupname) on delete cascade on update cascade, " +
-				"FOREIGN KEY (person) REFERENCES persons(person) on delete cascade on update cascade);");
+		statement.addBatch("CREATE TABLE groups_persons ( group_id INTEGER, person_id INTEGER, " +
+				"FOREIGN KEY (group_id) REFERENCES groups(group_id) on delete cascade on update cascade, " +
+				"FOREIGN KEY (person_id) REFERENCES persons(person_id) on delete cascade on update cascade);");
 
-		statement.addBatch("CREATE TABLE events ( event VARCHAR(50) NOT NULL, " +
+		statement.addBatch("CREATE TABLE events ( event VARCHAR(50) NOT NULL UNIQUE, " +
+				"event_id INTEGER NOT NULL, " +
 				"datestart DATETIME NOT NULL, " +
 				"dateend DATETIME NOT NULL, " +
-				"PRIMARY KEY (event));");
+				"PRIMARY KEY (event_id));");
 
 		statement.addBatch("CREATE TABLE days ( day DATE, num_images INTEGER DEFAULT 1, " +
 				"PRIMARY KEY (day));");
