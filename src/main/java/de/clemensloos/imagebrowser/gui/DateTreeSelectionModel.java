@@ -22,11 +22,13 @@ class DateTreeSelectionModel extends DefaultTreeSelectionModel {
 	DateTreeSelectionModel(ImageBrowser2DGui gui) {
 		super();
 		this.gui = gui;
+
 	}
 
 
 	@Override
 	public void addSelectionPath(TreePath p) {
+
 		if (p.getPathCount() == 1) {
 			clearSelection();
 			gui.imageBrowser.clearDates();
@@ -48,6 +50,7 @@ class DateTreeSelectionModel extends DefaultTreeSelectionModel {
 
 	@Override
 	public void removeSelectionPath(TreePath p) {
+
 		if (p.getPathCount() == 2 || p.getPathCount() == 3) {
 			removeChildSelectionPath(p);
 		}
@@ -86,12 +89,11 @@ class DateTreeSelectionModel extends DefaultTreeSelectionModel {
 
 	@Override
 	public void setSelectionPath(TreePath arg0) {
-		if (isPathSelected(arg0)) {
-			removeSelectionPath(arg0);
-		}
-		else {
-			addSelectionPath(arg0);
-		}
+
+		clearSelection();
+		gui.imageBrowser.clearDates();
+
+		addSelectionPath(arg0);
 	}
 
 }

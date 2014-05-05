@@ -45,6 +45,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -408,6 +409,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		dateTree = new JTree(dateTreeModel);
 //		dateTree.setRootVisible(false);
 		dateTree.setSelectionModel(new DateTreeSelectionModel(this));
+//		dateTree.setSelectionModel(new DefaultTreeSelectionModel());
 		dateScrollPane = new JScrollPane(dateTree);
 
 		leftTabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
