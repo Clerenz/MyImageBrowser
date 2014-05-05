@@ -36,9 +36,12 @@ public class EventDialog extends JDialog implements ActionListener {
 	private JSpinner endTime;
 	private JButton okayButton;
 	private JButton cancelButton;
-
-
+	
+	
+	
+	
 	public EventDialog(Frame owner) {
+		
 		super(owner, "Create an event", true);
 
 		JPanel mainPanel = new JPanel();
@@ -91,6 +94,7 @@ public class EventDialog extends JDialog implements ActionListener {
 		setLocationRelativeTo(owner);
 
 		setVisible(true);
+		
 	}
 
 

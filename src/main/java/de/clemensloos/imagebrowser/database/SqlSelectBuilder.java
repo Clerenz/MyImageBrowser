@@ -46,7 +46,7 @@ public class SqlSelectBuilder {
 		String where = "";
 
 		for (ImgTag s : tags) {
-			where += " AND image_id IN (SELECT image_id FROM images_tags WHERE tag = '" + s + "')";
+			where += " AND image_id IN (SELECT image_id FROM images_tags WHERE tag_id = (SELECT tag_id FROM tags WHERE tag = '" + s + "'))";
 		}
 
 		for (ImgPerson s : persons) {

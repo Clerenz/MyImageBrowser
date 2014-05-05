@@ -153,7 +153,7 @@ public abstract class SqlInterface {
 	
 	public void createTag(ImgTag tag) throws SQLException {
 		
-		statement.executeUpdate("INSERT INTO tags VALUES ('" + tag.tagname + "');");
+		statement.executeUpdate("INSERT INTO tags VALUES ('" + tag.tagname + "', null);");
 	}
 	
 	

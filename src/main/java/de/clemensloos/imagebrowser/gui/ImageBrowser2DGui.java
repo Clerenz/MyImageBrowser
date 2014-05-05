@@ -45,7 +45,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -54,6 +53,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
 import de.clemensloos.imagebrowser.gui.dialog.EventDialog;
+import de.clemensloos.imagebrowser.gui.dialog.TagDialog;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
 import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgDate;
@@ -61,6 +61,7 @@ import de.clemensloos.imagebrowser.types.ImgEvent;
 import de.clemensloos.imagebrowser.types.ImgGroup;
 import de.clemensloos.imagebrowser.types.ImgPerson;
 import de.clemensloos.imagebrowser.types.ImgTag;
+import de.clemensloos.imagebrowser.types.ImgTagHelper;
 import de.clemensloos.imagebrowser.utils.MyProperties;
 
 
@@ -89,7 +90,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 
 	ImageBrowser imageBrowser;
-
+	public MyKeyEventDispatcher keyEventDispatcher;
+	
 	List<ImagePanel> loadedImages = new ArrayList<ImagePanel>();
 
 
@@ -137,6 +139,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	DefaultListModel<ImgTag> tagListModel;
 	JList<ImgTag> tagList;
 	JScrollPane tagScrollPane;
+	ImgTagHelper newTagLabel = new ImgTagHelper();
 	DefaultListModel<ImgPerson> personListModel;
 	JList<ImgPerson> personList;
 	JScrollPane personScrollPane;
@@ -164,7 +167,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	JSplitPane splitPaneVerti;
 	JSplitPane splitPaneHoriz;
 
-	JFrame frame;
+	public JFrame frame;
 
 	// GLASS PANE
 	MyGlassPane glassPane;
@@ -268,30 +271,63 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		tagListModel = new DefaultListModel<ImgTag>();
 		tagList = new JList<ImgTag>(tagListModel);
+		tagList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		tagList.setSelectionModel(new DefaultListSelectionModel() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
 
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void setSelectionInterval(int index0, int index1) {
-				if (tagList.isSelectedIndex(index0)) {
-					tagList.removeSelectionInterval(index0, index1);
-				} else {
-					tagList.addSelectionInterval(index0, index1);
+				if(index1 == tagListModel.getSize()-1) {
+					index1 = index1 - 1;
+					if (index1 < index0) {
+						return;
+					}
 				}
-				imageBrowser.setTags(tagList.getSelectedValuesList());
-				loadImages();
+				super.setSelectionInterval(index0, index1);
+				loadTags();
 			}
+			
+			@Override
+			public void addSelectionInterval(int index0, int index1) {
+				if(index1 == tagListModel.getSize()-1) {
+					index1 = index1 - 1;
+					if (index1 < index0) {
+						return;
+					}
+				}
+				super.addSelectionInterval(index0, index1);
+				loadTags();
+			}
+			
+			@Override
+			public void removeSelectionInterval(int index0, int index1) {
+				System.out.println(index0 + " - " + index1);
+				super.removeSelectionInterval(index0, index1);
+				loadTags();
+			}
+			
+			private void loadTags() {
+				imageBrowser.setTags(tagList.getSelectedValuesList()); // XXX
+				loadImages();
+				
+			}
+			
 		});
 		tagList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1) {
-					// imageBrowser.createTag(new Tag("test")); XXX
-					refreshGuiComponents();
+				if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+					if (tagListModel.get(tagList.locationToIndex(e.getPoint())) instanceof ImgTagHelper) {
+						keyEventDispatcher.setActive(false);
+						TagDialog td = new TagDialog(frame);
+						keyEventDispatcher.setActive(true);
+						ImgTag it = td.getImgTag();
+						if(it != null) {
+							imageBrowser.createTag(it);
+							loadTags();
+						}
+					}
 				}
 			}
 		});
@@ -392,7 +428,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 					TreePath selPath = eventTree.getPathForLocation(e.getX(), e.getY());
 					if (selPath != null && selPath.getLastPathComponent().equals(eventRootNode)) {
 						eventTree.expandPath(new TreePath(eventRootNode.getPath()));
+						keyEventDispatcher.setActive(false);
 						EventDialog ed = new EventDialog(frame);
+						keyEventDispatcher.setActive(true);
 						ImgEvent ie = ed.getImgEvent();
 						if (ie != null) {
 							imageBrowser.createEvent(ie);
@@ -505,7 +543,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		frame.setVisible(true);
 
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new MyKeyEventDispatcher(this));
+		keyEventDispatcher = new MyKeyEventDispatcher(this);
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
 
 		refreshGuiComponents();
 
@@ -678,6 +717,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		for (ImgTag t : tags) {
 			tagListModel.addElement(t);
 		}
+		
+		tagListModel.addElement(newTagLabel);
+		
 	}
 
 
