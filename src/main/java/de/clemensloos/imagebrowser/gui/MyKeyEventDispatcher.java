@@ -30,10 +30,19 @@ public class MyKeyEventDispatcher implements KeyEventDispatcher {
 		
 		if(e.getExtendedKeyCode() == KeyEvent.VK_A && e.isControlDown()) {
 			if(e.getID() == KeyEvent.KEY_RELEASED ) {
-				System.out.println("Go select all"); // XXX
+				gui.selectAll();
 			}
 			return true;
 		}
+		
+		if(e.getExtendedKeyCode() == KeyEvent.VK_D && e.isControlDown()) {
+			if(e.getID() == KeyEvent.KEY_RELEASED ) {
+				gui.deselectAll();
+			}
+			return true;
+		}
+		
+		
 		
 		return false;
 	}

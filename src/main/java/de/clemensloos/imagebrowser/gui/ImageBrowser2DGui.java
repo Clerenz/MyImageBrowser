@@ -308,7 +308,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 			}
 			
 			private void loadTags() {
-				imageBrowser.setTags(tagList.getSelectedValuesList()); // XXX
+				imageBrowser.setTags(tagList.getSelectedValuesList());
 				loadImages();
 				
 			}
@@ -645,6 +645,14 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		scrollPane.validate();
 		scrollPane.repaint();
+	}
+	
+	
+	@Override
+	public void selectAll() {
+		for (ImagePanel ip : loadedImages) {
+			ip.select();
+		}
 	}
 
 

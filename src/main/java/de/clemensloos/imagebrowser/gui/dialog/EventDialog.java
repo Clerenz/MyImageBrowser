@@ -31,6 +31,7 @@ public class EventDialog extends JDialog implements ActionListener {
 
 	private JTextField eventTextField;
 	private JXDatePicker startDate;
+//	private JSpinner startDate;
 	private JXDatePicker endDate;
 	private JSpinner startTime;
 	private JSpinner endTime;
@@ -49,6 +50,9 @@ public class EventDialog extends JDialog implements ActionListener {
 		eventTextField = new JTextField(25);
 
 		startDate = new JXDatePicker(new Date());
+//		startDate = new JSpinner(new SpinnerDateModel());
+//		JSpinner.DateEditor startDateEditor = new JSpinner.DateEditor(startDate, "dd.MM.yyyy");
+//		startDate.setEditor(startDateEditor);
 		endDate = new JXDatePicker(new Date());
 
 		startTime = new JSpinner(new SpinnerDateModel());

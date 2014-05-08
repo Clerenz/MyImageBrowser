@@ -106,7 +106,7 @@ public class ImagePanel extends JPanel {
 			}
 
 
-			@Override //TODO!!!
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.isControlDown()) {
 					image.selected = !image.selected;
@@ -253,6 +253,12 @@ public class ImagePanel extends JPanel {
 			imageSizeY += imagePosY;
 		}
 
+	}
+	
+	
+	public void select() {
+		image.selected = true;
+		setBorder(BorderFactory.createLineBorder(Color.RED, 2));
 	}
 	
 	

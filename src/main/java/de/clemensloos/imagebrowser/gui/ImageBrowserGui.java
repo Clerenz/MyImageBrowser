@@ -11,6 +11,8 @@ public interface ImageBrowserGui {
 	
 	public abstract void shutDown();
 	
+	public abstract void selectAll();
+
 	public abstract void deselectAll();
 	
 	public void refreshGuiComponents();

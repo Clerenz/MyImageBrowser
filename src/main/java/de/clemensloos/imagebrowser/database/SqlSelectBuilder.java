@@ -97,8 +97,6 @@ public class SqlSelectBuilder {
 
 		String s = "SELECT * FROM images" + where + order.sql + ";";
 
-//		System.out.println(s); // XXX
-		
 		return s;
 
 	}
