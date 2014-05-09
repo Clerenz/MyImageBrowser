@@ -117,6 +117,12 @@ public class Image extends JPanel implements Comparable<Image> {
 		if (obj == null) {
 			return false;
 		}
+//		if(obj instanceof Integer) {
+//			if(image_id == (int) obj) {
+//				System.out.println("TSCHAKKA"); // FIXME
+//				return true;
+//			}
+//		}
 		if (!(obj instanceof Image)) {
 			return false;
 		}

@@ -3,6 +3,7 @@ package de.clemensloos.imagebrowser.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.KeyboardFocusManager;
@@ -19,9 +20,9 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -39,6 +40,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
@@ -65,7 +67,13 @@ import de.clemensloos.imagebrowser.types.ImgTagHelper;
 import de.clemensloos.imagebrowser.utils.MyProperties;
 
 
-public class ImageBrowser2DGui implements ImageBrowserGui {
+public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
+
+	public static final int VIEW_MODE_MULTI = 0;
+	public static final int VIEW_MODE_SINGLE = 1;
+
+
+	// public static final int VIEW_MODE_COMPARE = 2;
 
 	/**
 	 * @param args
@@ -75,7 +83,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		try {
 			// UIManager.setLookAndFeel(com.jgoodies.looks.windows.WindowsLookAndFeel.class.getCanonicalName());
 			UIManager.setLookAndFeel(com.jtattoo.plaf.hifi.HiFiLookAndFeel.class.getCanonicalName());
-//			 UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
+			// UIManager.setLookAndFeel(com.jtattoo.plaf.noire.NoireLookAndFeel.class.getCanonicalName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -92,8 +100,14 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	ImageBrowser imageBrowser;
 	public MyKeyEventDispatcher keyEventDispatcher;
 	
-	List<ImagePanel> loadedImages = new ArrayList<ImagePanel>();
+	public volatile float alpha = 0f;
+	public volatile float delta = 0.2f;
+	Timer timer;
 
+//	List<ImagePanel> loadedImages = new ArrayList<ImagePanel>();
+	HashMap<Integer, ImagePanel> loadedImages2 = new HashMap<Integer, ImagePanel>();
+	int leadSelection = -1;
+	
 
 	ImageBrowser2DGui() {
 
@@ -104,8 +118,47 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		initGui();
 
 		refreshGuiComponents();
+		
 	}
-
+	
+	
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		if (e.getSource().equals(timer)) {
+			
+			alpha += delta;
+			if (alpha >= 1f) {
+				alpha = 1f;
+				delta *= -1.f;
+				loadImages();
+			}
+			else if (alpha <= 0f) {
+				alpha = 0f;
+				delta *= -1.f;
+				timer.stop();
+			}
+			
+			mainPanel.repaint();
+		}
+	}
+	
+	
+	public void switchView() {
+		
+		if(mainPanelViewMode == VIEW_MODE_MULTI) {
+			mainPanelViewMode = VIEW_MODE_SINGLE;
+		}
+		else {
+			mainPanelViewMode = VIEW_MODE_MULTI;
+		}
+		
+		timer = new Timer(50, this);
+		timer.start();
+	}
+	
+	
 
 	private MyProperties guiProperties;
 
@@ -116,12 +169,11 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		guiProperties = new MyProperties(imageBrowser, propFile, true);
 
 	}
-
-
-	int columnsOfImages = 4;
-
+	
 	// MAIN AREA
 	JPanel mainPanel;
+	public int mainPanelViewMode = 0; // TODO: persist
+	int columnsOfImages = 4; // TODO: persist
 	JScrollPane scrollPane;
 
 	// LOWER AREA
@@ -179,13 +231,13 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 		// listModel = new DefaultListModel<Image>();
 		// list = new JList<Image>(listModel);
-		mainPanel = new JPanel(true);
+		mainPanel = new JPanel();
 		mainPanel.setLayout(null);
 		scrollPane = new JScrollPane(mainPanel);
 		scrollPane.setTransferHandler(new MyTransferHandler(this));
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
+		// scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		scrollPane.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent arg0) {
@@ -276,9 +328,10 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 			private static final long serialVersionUID = 1L;
 
+
 			@Override
 			public void setSelectionInterval(int index0, int index1) {
-				if(index1 == tagListModel.getSize()-1) {
+				if (index1 == tagListModel.getSize() - 1) {
 					index1 = index1 - 1;
 					if (index1 < index0) {
 						return;
@@ -287,10 +340,11 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				super.setSelectionInterval(index0, index1);
 				loadTags();
 			}
-			
+
+
 			@Override
 			public void addSelectionInterval(int index0, int index1) {
-				if(index1 == tagListModel.getSize()-1) {
+				if (index1 == tagListModel.getSize() - 1) {
 					index1 = index1 - 1;
 					if (index1 < index0) {
 						return;
@@ -299,20 +353,22 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 				super.addSelectionInterval(index0, index1);
 				loadTags();
 			}
-			
+
+
 			@Override
 			public void removeSelectionInterval(int index0, int index1) {
 				System.out.println(index0 + " - " + index1);
 				super.removeSelectionInterval(index0, index1);
 				loadTags();
 			}
-			
+
+
 			private void loadTags() {
 				imageBrowser.setTags(tagList.getSelectedValuesList());
 				loadImages();
-				
+
 			}
-			
+
 		});
 		tagList.addMouseListener(new MouseAdapter() {
 			@Override
@@ -323,7 +379,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 						TagDialog td = new TagDialog(frame);
 						keyEventDispatcher.setActive(true);
 						ImgTag it = td.getImgTag();
-						if(it != null) {
+						if (it != null) {
 							imageBrowser.createTag(it);
 							loadTags();
 						}
@@ -417,7 +473,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		// BUILD LEFT AREA ===================================================
 
 		eventRootNode = new DefaultMutableTreeNode("Add Event ...");
-//		eventRootNode.
+		// eventRootNode.
 		eventTreeModel = new DefaultTreeModel(eventRootNode, true);
 		eventTree = new JTree(eventTreeModel);
 		eventTree.setSelectionModel(new EventTreeSelectionModel(this));
@@ -445,9 +501,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		dateRootNode = new DateTreeHelper("Dates");
 		dateTreeModel = new DefaultTreeModel(dateRootNode, true);
 		dateTree = new JTree(dateTreeModel);
-//		dateTree.setRootVisible(false);
+		// dateTree.setRootVisible(false);
 		dateTree.setSelectionModel(new DateTreeSelectionModel(this));
-//		dateTree.setSelectionModel(new DefaultTreeSelectionModel());
+		// dateTree.setSelectionModel(new DefaultTreeSelectionModel());
 		dateScrollPane = new JScrollPane(dateTree);
 
 		leftTabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
@@ -601,66 +657,150 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 
 	public void loadImages() {
 
-		mainPanel.removeAll();
-		int i = 0;
-		int row = 0;
-		int width = scrollPane.getWidth() - 17;
-		int gap = 4;
-		int diameter = (width - ((columnsOfImages + 1) * gap)) / columnsOfImages;
+		if (mainPanelViewMode == VIEW_MODE_MULTI) {
 
-		List<Image> images = imageBrowser.getImages();
-		List<ImagePanel> newList = new ArrayList<ImagePanel>();
-		if (images.size() > 0) {
-			for (row = 0; row < Integer.MAX_VALUE; row++) {
-				int y = gap + (row * (diameter + gap));
-				for (int col = 0; col < columnsOfImages; col++) {
-					int x = gap + (col * (diameter + gap));
+			mainPanel.removeAll();
+			int i = 0;
+			int row = 0;
+			int width = scrollPane.getWidth() - 17;
+			int gap = 4;
+			int diameter = (width - ((columnsOfImages + 1) * gap)) / columnsOfImages;
 
-					ImagePanel panel;
-					if (loadedImages.contains(images.get(i))) {
-						panel = loadedImages.remove(loadedImages.indexOf(images.get(i)));
-						panel.refresh(images.get(i), x, y, diameter);
+			List<Image> images = imageBrowser.getImages();
+//			List<ImagePanel> newList = new ArrayList<ImagePanel>();
+			HashMap<Integer, ImagePanel> newList2 = new HashMap<Integer, ImagePanel>();
+			ImagePanel panel = null;
+			if (images.size() > 0) {
+				for (row = 0; row < Integer.MAX_VALUE; row++) {
+					int y = gap + (row * (diameter + gap));
+					for (int col = 0; col < columnsOfImages; col++) {
+						int x = gap + (col * (diameter + gap));
+
+						panel = loadedImages2.remove(images.get(i).image_id);
+						if (panel != null) {
+//							panel = loadedImages.remove(loadedImages.indexOf(images.get(i)));
+							panel.refresh(images.get(i), x, y, diameter, diameter);
+						}
+						else {
+							panel = new ImagePanel(this, images.get(i), x, y, diameter, diameter);
+						}
+						newList2.put(images.get(i).image_id, panel);
+
+						mainPanel.add(panel);
+						i++;
+						if (i == images.size()) {
+							break;
+						}
 					}
-					else {
-						panel = new ImagePanel(this, images.get(i), x, y, diameter);
-					}
-					newList.add(panel);
-
-					mainPanel.add(panel);
-					i++;
 					if (i == images.size()) {
 						break;
 					}
 				}
-				if (i == images.size()) {
-					break;
-				}
 			}
+
 			Dimension d = new Dimension(width, (row + 1) * (diameter + gap) + gap);
 			mainPanel.setPreferredSize(d);
+
+			loadedImages2.clear();
+			loadedImages2.putAll(newList2);
+
+			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+			scrollPane.getVerticalScrollBar().setUnitIncrement(diameter);
+			scrollPane.getVerticalScrollBar().setBlockIncrement(diameter);
+			scrollPane.validate();
+			scrollPane.repaint();
+			
+			if (leadSelection != -1) { // TODO: lead selection panel
+				ImagePanel ip = loadedImages2.get(leadSelection);
+				if (ip != null) {
+					ip.scrollRectToVisible(ip.getBounds());
+				}
+			}
+			
+		}
+		else if (mainPanelViewMode == VIEW_MODE_SINGLE) {
+
+			mainPanel.removeAll();
+			int width = scrollPane.getWidth();
+			int height = scrollPane.getHeight();
+
+			List<Image> images = imageBrowser.getImages();
+//			List<ImagePanel> newList = new ArrayList<ImagePanel>();
+			HashMap<Integer, ImagePanel> newList2 = new HashMap<Integer, ImagePanel>();
+			
+//			ImagePanel panel = null;
+			
+			for(Image i : images) {
+				
+				int key = i.image_id;
+				ImagePanel ip = loadedImages2.remove(key);
+				
+				if (ip == null) {
+					ip = new ImagePanel(this, i, 0, 0, 10, 10);
+				}
+				else {
+//					ip.refresh(i, 0, 0, 10, 10);
+				}
+				
+				if (key == leadSelection) {
+					ip.refresh(i, 0, 0, width, height);
+				}
+				newList2.put(key, ip);
+				
+			}
+			
+			ImagePanel panel = newList2.get(leadSelection);
+			if (panel == null) {
+				panel = new ImagePanel(this, images.get(0), 0, 0, width, height);
+			}
+
+//			newList2.put(panel.image.image_id, panel);
+
+			mainPanel.add(panel);
+
+			Dimension d = new Dimension(width, height);
+			mainPanel.setPreferredSize(d);
+
+//			loadedImages2.clear();
+//			loadedImages2.putAll(newList2);
+
+			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+			scrollPane.validate();
+			scrollPane.repaint();
+
 		}
 
-		loadedImages.clear();
-		loadedImages.addAll(newList);
-
-		scrollPane.validate();
-		scrollPane.repaint();
 	}
 	
-	
+
+
 	@Override
 	public void selectAll() {
-		for (ImagePanel ip : loadedImages) {
+		
+		for(ImagePanel ip: loadedImages2.values()) {
 			ip.select();
 		}
+
+//		for (ImagePanel ip : loadedImages) {
+//			ip.select();
+//		}
 	}
 
 
 	@Override
 	public void deselectAll() {
-		for (ImagePanel ip : loadedImages) {
+		
+		for(ImagePanel ip: loadedImages2.values()) {
 			ip.deselect();
 		}
+		
+//		for (ImagePanel ip : loadedImages) {
+//			ip.deselect();
+//		}
 	}
 
 
@@ -725,9 +865,9 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 		for (ImgTag t : tags) {
 			tagListModel.addElement(t);
 		}
-		
+
 		tagListModel.addElement(newTagLabel);
-		
+
 	}
 
 
@@ -768,8 +908,10 @@ public class ImageBrowser2DGui implements ImageBrowserGui {
 	@Override
 	public void shutDown() {
 
-		guiProperties.setProp("gui_frame_size", new Point(frame.getWidth(), frame.getHeight()));
-		guiProperties.setProp("gui_frame_position", frame.getLocation());
+		if (frame.getExtendedState() != Frame.MAXIMIZED_BOTH) {
+			guiProperties.setProp("gui_frame_size", new Point(frame.getWidth(), frame.getHeight()));
+			guiProperties.setProp("gui_frame_position", frame.getLocation());
+		}
 		guiProperties.setProp("gui_frame_maximized", frame.getExtendedState());
 
 	}

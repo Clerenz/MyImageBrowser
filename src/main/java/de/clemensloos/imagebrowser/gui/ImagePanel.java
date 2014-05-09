@@ -4,6 +4,7 @@ package de.clemensloos.imagebrowser.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -48,21 +49,20 @@ public class ImagePanel extends JPanel {
 	int imageSizeX = 0;
 	int imageSizeY = 0;
 
-	private ImageWorker imageWorker = new ImageWorker();
-	private ImageBrowserGui gui;
+	private ImageBrowser2DGui gui;
 
 	JButton tagImageButton;
 
 
-	public ImagePanel(ImageBrowserGui g, Image i, int x, int y, int diameter) {
-		
-		super();
-		
+	public ImagePanel(ImageBrowser2DGui g, Image i, int x, int y, int width, int height) {
+
+		super(true);
+
 		this.gui = g;
 
 		this.image = i;
 
-		Dimension d = new Dimension(diameter, diameter);
+		Dimension d = new Dimension(width, height);
 		setSize(d);
 		setMaximumSize(d);
 		setMinimumSize(d);
@@ -71,11 +71,14 @@ public class ImagePanel extends JPanel {
 		setBackground(Color.black);
 		setOpaque(true);
 
-		setBounds(x, y, diameter, diameter);
+		setBounds(x, y, width, height);
 
-		setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
-		if(image.selected) {
-			setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+		if(gui.mainPanelViewMode == ImageBrowser2DGui.VIEW_MODE_MULTI) {
+			if (image.selected) {
+				setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+			} else {
+				setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+			}
 		}
 
 		addMouseListener(new MouseListener() {
@@ -92,8 +95,8 @@ public class ImagePanel extends JPanel {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				if(!contains(e.getPoint())) {
-					setBackground(Color.BLACK);
+				if (!contains(e.getPoint())) {
+//					setBackground(Color.BLACK); TODO
 					tagImageButton.setVisible(false);
 				}
 			}
@@ -101,25 +104,36 @@ public class ImagePanel extends JPanel {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				setBackground(Color.DARK_GRAY);
+//				setBackground(Color.DARK_GRAY); TODO
 				tagImageButton.setVisible(true);
 			}
 
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				
+				gui.leadSelection = image.image_id;
+				
+				if(e.getClickCount() == 2) {
+					gui.switchView();
+					return;
+				}
+				
 				if (e.isControlDown()) {
 					image.selected = !image.selected;
 				}
-				else if(!image.selected){
+				else if (!image.selected) {
 					gui.deselectAll();
 					image.selected = true;
 				}
-				if(image.selected) {
-					setBorder(BorderFactory.createLineBorder(Color.RED, 2));
-				}
-				else {
-					setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+				
+				if (gui.mainPanelViewMode == ImageBrowser2DGui.VIEW_MODE_MULTI) {
+					if (image.selected) {
+						setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+					}
+					else {
+						setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+					}
 				}
 			}
 		});
@@ -128,53 +142,56 @@ public class ImagePanel extends JPanel {
 
 		selectImageSizing();
 
+		ImageWorker imageWorker = new ImageWorker();
 		imageWorker.execute();
-		
 
 		tagImageButton = new JButton("...");
 		tagImageButton.addActionListener(new ActionListener() { // TODO
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				gui.showUserMessage("click");
-			}
-		});
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						gui.showUserMessage("click");
+					}
+				});
 		tagImageButton.setVisible(false);
-		
-		
+
 		String columnSpecs = "3dlu, pref, 3dlu, pref:GROW, 3dlu, pref, 3dlu";
 		String rowSpecs = "3dlu, pref, 3dlu, pref:GROW, 3dlu, pref, 3dlu";
 		FormLayout layout = new FormLayout(columnSpecs, rowSpecs);
 		layout.setColumnGroups(new int[][] { { 2, 6 } });
 		layout.setRowGroups(new int[][] { { 2, 6 } });
 		setLayout(layout);
-		
+
 		PanelBuilder builder = new PanelBuilder(layout, this);
 		CellConstraints cc = new CellConstraints();
-		
+
 		builder.add(tagImageButton, cc.xy(6, 6));
 	}
 
 
-	public void refresh(Image image, int x, int y, int diameter) {
-
+	public void refresh(Image image, int x, int y, int width, int height) {
+		
 		this.image = image;
 
-		Dimension d = new Dimension(diameter, diameter);
+		Dimension d = new Dimension(width, height);
 		setSize(d);
 		setMaximumSize(d);
 		setMinimumSize(d);
 		setPreferredSize(d);
 		setForeground(Color.white);
 		setBackground(Color.black);
+		if(gui.mainPanelViewMode == ImageBrowser2DGui.VIEW_MODE_SINGLE) {
+			setBorder(null);
+		}
+//		setBorder(null);
 		setOpaque(true);
 
-		setBounds(x, y, diameter, diameter);
-		
-		
+		setBounds(x, y, width, height);
+
 		calcImageSizes();
 
 		selectImageSizing();
 
+		ImageWorker imageWorker = new ImageWorker();
 		imageWorker.execute();
 
 	}
@@ -188,6 +205,12 @@ public class ImagePanel extends JPanel {
 			g.drawImage(bi, imagePosX, imagePosY, imageSizeX, imageSizeY, 0, 0,
 					bi.getWidth(), bi.getHeight(), null);
 		}
+		
+		Graphics2D g2d = (Graphics2D) g;
+		Color c = new Color(0, 0, 0, gui.alpha);
+		g2d.setColor(c);
+		g2d.fillRect(0, 0, getWidth(), getHeight());
+		
 	}
 
 
@@ -205,13 +228,15 @@ public class ImagePanel extends JPanel {
 					}
 					else {
 						bi = ImageIO.read(new File(image.filepath + "\\" + image.filename));
-						Thumbnails
-								.of(bi)
-								.size(thumbSize, thumbSize)
-								.toFile(realImgPath);
-						bi = ImageIO.read(thumb);
+						if (thumbSize > 0) {
+							Thumbnails
+									.of(bi)
+									.size(thumbSize, thumbSize)
+									.toFile(realImgPath);
+							bi = ImageIO.read(thumb);
+						}
 					}
-					
+
 					sizeChanged = false;
 				}
 
@@ -235,41 +260,50 @@ public class ImagePanel extends JPanel {
 
 	private void calcImageSizes() {
 
-		if (image.imagewidth >= image.imageheight) {
-			imageSizeX = getWidth();
+		double labelRatio = (double) getWidth() / (double) getHeight();
+		double imageRatio = (double) image.imagewidth / (double) image.imageheight;
+
+		if (labelRatio <= imageRatio) {
+			imagePosX = 0;
+			imageSizeX = getWidth();			
 		}
 		else {
-			imageSizeX = (int) (getWidth() * ((double) image.imagewidth / (double) image.imageheight));
-			imagePosX = (getWidth() - imageSizeX) / 2;
-			imageSizeX += imagePosX;
+			 imageSizeX = (int) (getWidth() * (imageRatio / labelRatio));
+			 imagePosX = (getWidth() - imageSizeX) / 2;
+			 imageSizeX += imagePosX;			
 		}
-
-		if (image.imagewidth <= image.imageheight) {
+		
+		if (labelRatio >= imageRatio) {
+			imagePosY = 0;
 			imageSizeY = getHeight();
 		}
 		else {
-			imageSizeY = (int) (getHeight() / ((double) image.imagewidth / (double) image.imageheight));
+			imageSizeY = (int) (getHeight() * (labelRatio / imageRatio));
 			imagePosY = (getHeight() - imageSizeY) / 2;
 			imageSizeY += imagePosY;
 		}
-
+		
 	}
-	
-	
+
+
 	public void select() {
 		image.selected = true;
-		setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+		if(gui.mainPanelViewMode == ImageBrowser2DGui.VIEW_MODE_MULTI) {
+			setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+		}
 	}
-	
-	
+
+
 	public void deselect() {
 		image.selected = false;
-		setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+		if(gui.mainPanelViewMode == ImageBrowser2DGui.VIEW_MODE_MULTI){
+			setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+		}
 	}
 
 
 	private void selectImageSizing() {
-		
+
 		int oldValue = thumbSize;
 
 		if (imageSizeX < THUMB_MIN && imageSizeY < THUMB_MIN) {
@@ -288,7 +322,11 @@ public class ImagePanel extends JPanel {
 			realImgPath = ImageBrowser.projectName + "\\thumbs\\" + image.image_id + "_" + THUMB_MAX + ".jpg";
 			thumbSize = THUMB_MAX;
 		}
-		
+		else {
+			realImgPath = "void";
+			thumbSize = 0;
+		}
+
 		if (thumbSize != oldValue) {
 			sizeChanged = true;
 		}
