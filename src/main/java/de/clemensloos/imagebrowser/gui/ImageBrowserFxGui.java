@@ -308,5 +308,11 @@ public class ImageBrowserFxGui extends Application implements ImageBrowserGui {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void selectAll() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }
