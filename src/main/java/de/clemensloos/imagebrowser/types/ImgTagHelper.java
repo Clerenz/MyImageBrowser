@@ -4,7 +4,7 @@ public class ImgTagHelper extends ImgTag {
 
 	public ImgTagHelper() {
 		
-		super("New tag ...");
+		super("New tag...");
 	}
 
 }

@@ -55,13 +55,17 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.clemensloos.imagebrowser.ImageBrowser;
 import de.clemensloos.imagebrowser.gui.dialog.EventDialog;
+import de.clemensloos.imagebrowser.gui.dialog.GroupDialog;
+import de.clemensloos.imagebrowser.gui.dialog.PersonDialog;
 import de.clemensloos.imagebrowser.gui.dialog.TagDialog;
 import de.clemensloos.imagebrowser.types.DateTreeHelper;
 import de.clemensloos.imagebrowser.types.Image;
 import de.clemensloos.imagebrowser.types.ImgDate;
 import de.clemensloos.imagebrowser.types.ImgEvent;
 import de.clemensloos.imagebrowser.types.ImgGroup;
+import de.clemensloos.imagebrowser.types.ImgGroupHelper;
 import de.clemensloos.imagebrowser.types.ImgPerson;
+import de.clemensloos.imagebrowser.types.ImgPersonHelper;
 import de.clemensloos.imagebrowser.types.ImgTag;
 import de.clemensloos.imagebrowser.types.ImgTagHelper;
 import de.clemensloos.imagebrowser.utils.MyProperties;
@@ -105,7 +109,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 	Timer timer;
 
 //	List<ImagePanel> loadedImages = new ArrayList<ImagePanel>();
-	HashMap<Integer, ImagePanel> loadedImages2 = new HashMap<Integer, ImagePanel>();
+	HashMap<Integer, ImagePanel> loadedImages = new HashMap<Integer, ImagePanel>();
 	int leadSelection = -1;
 	
 
@@ -195,9 +199,11 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 	DefaultListModel<ImgPerson> personListModel;
 	JList<ImgPerson> personList;
 	JScrollPane personScrollPane;
+	ImgPersonHelper newPersonLabel = new ImgPersonHelper();
 	DefaultListModel<ImgGroup> groupListModel;
 	JList<ImgGroup> groupList;
 	JScrollPane groupScrollPane;
+	ImgGroupHelper newGroupLabel = new ImgGroupHelper();
 
 	// LEFT AREA
 	JPanel leftPanel;
@@ -357,7 +363,6 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 
 			@Override
 			public void removeSelectionInterval(int index0, int index1) {
-				System.out.println(index0 + " - " + index1);
 				super.removeSelectionInterval(index0, index1);
 				loadTags();
 			}
@@ -391,52 +396,137 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 
 		personListModel = new DefaultListModel<ImgPerson>();
 		personList = new JList<ImgPerson>(personListModel);
+		personList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		personList.setSelectionModel(new DefaultListSelectionModel() {
 
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
+
+			
+			@Override
+			public void setSelectionInterval(int index0, int index1) {
+				if (index1 == personListModel.getSize() - 1) {
+					index1 = index1 - 1;
+					if (index1 < index0) {
+						return;
+					}
+				}
+				super.setSelectionInterval(index0, index1);
+				loadPersons();
+			}
 
 
 			@Override
-			public void setSelectionInterval(int index0, int index1) {
-				if (personList.isSelectedIndex(index0)) {
-					personList.removeSelectionInterval(index0, index1);
-				} else {
-					personList.addSelectionInterval(index0, index1);
+			public void addSelectionInterval(int index0, int index1) {
+				if (index1 == personListModel.getSize() - 1) {
+					index1 = index1 - 1;
+					if (index1 < index0) {
+						return;
+					}
 				}
-				imageBrowser.setPersons(personList.getSelectedValuesList());
-				loadImages();
+				super.addSelectionInterval(index0, index1);
+				loadPersons();
 			}
 
+
+			@Override
+			public void removeSelectionInterval(int index0, int index1) {
+				super.removeSelectionInterval(index0, index1);
+				loadPersons();
+			}
+
+
+			private void loadPersons() {
+				imageBrowser.setPersons(personList.getSelectedValuesList());
+				loadImages();
+
+			}
+
+		});
+		personList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+					if (personListModel.get(personList.locationToIndex(e.getPoint())) instanceof ImgPersonHelper) {
+						keyEventDispatcher.setActive(false);
+						PersonDialog pd = new PersonDialog(frame);
+						keyEventDispatcher.setActive(true);
+						ImgPerson ip = pd.getImgPerson();
+						if (ip != null) {
+							imageBrowser.createPerson(ip);
+							loadPersons();
+						}
+					}
+				}
+			}
 		});
 		personScrollPane = new JScrollPane(personList);
 
 		groupListModel = new DefaultListModel<ImgGroup>();
 		groupList = new JList<ImgGroup>(groupListModel);
+		groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		groupList.setSelectionModel(new DefaultListSelectionModel() {
 
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
+
+			
+			@Override
+			public void setSelectionInterval(int index0, int index1) {
+				if (index1 == groupListModel.getSize() - 1) {
+					index1 = index1 - 1;
+					if (index1 < index0) {
+						return;
+					}
+				}
+				super.setSelectionInterval(index0, index1);
+				loadGroup();
+			}
 
 
 			@Override
-			public void setSelectionInterval(int index0, int index1) {
-				if (groupList.isSelectedIndex(index0)) {
-					groupList.removeSelectionInterval(index0, index1);
-					imageBrowser.clearGroup();
-				} else {
-					super.setSelectionInterval(index0, index1);
-					imageBrowser.setGroup(groupList.getSelectedValue(), true);
+			public void addSelectionInterval(int index0, int index1) {
+				if (index1 == groupListModel.getSize() - 1) {
+					index1 = index1 - 1;
+					if (index1 < index0) {
+						return;
+					}
 				}
+				super.addSelectionInterval(index0, index1);
+				loadGroup();
+			}
+
+
+			@Override
+			public void removeSelectionInterval(int index0, int index1) {
+				super.removeSelectionInterval(index0, index1);
+				loadGroup();
+			}
+
+
+			private void loadGroup() {
+				imageBrowser.setPersons(personList.getSelectedValuesList());
+				imageBrowser.setGroup(groupList.getSelectedValue(), true); // FIXME: make group selection editable
 				loadImages();
+
 			}
 
 		});
-		groupList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		groupList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+					if (groupListModel.get(groupList.locationToIndex(e.getPoint())) instanceof ImgGroupHelper) {
+						keyEventDispatcher.setActive(false);
+						GroupDialog gd = new GroupDialog(frame);
+						keyEventDispatcher.setActive(true);
+						ImgGroup group = gd.getImgGroup();
+						if (group != null) {
+							imageBrowser.createGroup(group);
+							loadGroups();
+						}
+					}
+				}
+			}
+		});
 		groupScrollPane = new JScrollPane(groupList);
 
 		bottomPanel = new JPanel();
@@ -676,7 +766,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 					for (int col = 0; col < columnsOfImages; col++) {
 						int x = gap + (col * (diameter + gap));
 
-						panel = loadedImages2.remove(images.get(i).image_id);
+						panel = loadedImages.remove(images.get(i).image_id);
 						if (panel != null) {
 //							panel = loadedImages.remove(loadedImages.indexOf(images.get(i)));
 							panel.refresh(images.get(i), x, y, diameter, diameter);
@@ -701,8 +791,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 			Dimension d = new Dimension(width, (row + 1) * (diameter + gap) + gap);
 			mainPanel.setPreferredSize(d);
 
-			loadedImages2.clear();
-			loadedImages2.putAll(newList2);
+			loadedImages.clear();
+			loadedImages.putAll(newList2);
 
 			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -713,7 +803,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 			scrollPane.repaint();
 			
 			if (leadSelection != -1) { // TODO: lead selection panel
-				ImagePanel ip = loadedImages2.get(leadSelection);
+				ImagePanel ip = loadedImages.get(leadSelection);
 				if (ip != null) {
 					ip.scrollRectToVisible(ip.getBounds());
 				}
@@ -735,7 +825,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 			for(Image i : images) {
 				
 				int key = i.image_id;
-				ImagePanel ip = loadedImages2.remove(key);
+				ImagePanel ip = loadedImages.remove(key);
 				
 				if (ip == null) {
 					ip = new ImagePanel(this, i, 0, 0, 10, 10);
@@ -781,7 +871,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 	@Override
 	public void selectAll() {
 		
-		for(ImagePanel ip: loadedImages2.values()) {
+		for(ImagePanel ip: loadedImages.values()) {
 			ip.select();
 		}
 
@@ -794,7 +884,7 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 	@Override
 	public void deselectAll() {
 		
-		for(ImagePanel ip: loadedImages2.values()) {
+		for(ImagePanel ip: loadedImages.values()) {
 			ip.deselect();
 		}
 		
@@ -882,6 +972,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 		for (ImgPerson p : persons) {
 			personListModel.addElement(p);
 		}
+		
+		personListModel.addElement(newPersonLabel);
 	}
 
 
@@ -896,6 +988,8 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 		for (ImgGroup g : groups) {
 			groupListModel.addElement(g);
 		}
+		
+		groupListModel.addElement(newGroupLabel);
 	}
 
 

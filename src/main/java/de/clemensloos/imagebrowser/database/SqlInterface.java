@@ -185,6 +185,19 @@ public abstract class SqlInterface {
 		}
 		return groups;
 	}
+	
+	
+	public void createPerson(ImgPerson person) throws SQLException {
+		
+		statement.executeUpdate("INSERT INTO persons VALUES ('" + person.username + "', null);");
+		
+	}
+	
+	
+	public void createGroup(ImgGroup group) throws SQLException {
+		
+		statement.executeUpdate("INSERT INTO groups VALUES ('" + group.groupname + "', null);");
+	}
 
 
 	public List<ImgPerson> getPersons() throws SQLException {

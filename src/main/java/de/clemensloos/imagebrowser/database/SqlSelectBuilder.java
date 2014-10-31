@@ -50,19 +50,19 @@ public class SqlSelectBuilder {
 		}
 
 		for (ImgPerson s : persons) {
-			where += " AND image_id IN (SELECT image_id FROM images_persons WHERE person = '" + s + "')";
+			where += " AND image_id IN (SELECT image_id FROM images_persons WHERE person_id = (SELECT person_id FROM persons WHERE person = '" + s + "'))";
 		}
 
 		if (wholeGroup) {
 			for (String s : groupPersons) {
-				where += " AND image_id IN (SELECT image_id FROM images_persons WHERE person = '" + s + "')";
+				where += " AND image_id IN (SELECT image_id FROM images_persons WHERE person_id = '" + s + "')";
 			}
 		}
 		else if (groupPersons.size() > 0) {
 			where += " AND (";
 			String or = "";
 			for (String s : groupPersons) {
-				or += " OR image_id IN (SELECT image_id FROM images_persons WHERE person = '" + s + "')";
+				or += " OR image_id IN (SELECT image_id FROM images_persons WHERE person_id = '" + s + "')";
 			}
 			or = or.replaceFirst(" OR ", " ");
 			where += or + " )";
@@ -158,9 +158,9 @@ public class SqlSelectBuilder {
 		this.wholeGroup = wholeGroup;
 		this.groupPersons.clear();
 		ResultSet rs = connection.createStatement().executeQuery(
-				"SELECT person FROM groups_persons WHERE groupname = '" + group + "'");
+				"SELECT person_id FROM groups_persons WHERE group_id = (SELECT group_id FROM groups WHERE groupname = '" + group + "')");
 		while (rs.next()) {
-			this.groupPersons.add(rs.getString("person"));
+			this.groupPersons.add(rs.getString("person_id"));
 		}
 	}
 

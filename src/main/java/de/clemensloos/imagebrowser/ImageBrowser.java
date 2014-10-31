@@ -105,6 +105,28 @@ public class ImageBrowser {
 	}
 
 
+	public void createEvent(ImgEvent event) {
+		try {
+			sqlInterface.createEvent(event);
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+
+	public List<ImgTag> getTags() {
+	
+		try {
+			return sqlInterface.getTags();
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+
+	// SQL SELECT BUILDER =====================================================
+	
 	public void createTag(ImgTag tag) {
 		try {
 			sqlInterface.createTag(tag);
@@ -123,23 +145,34 @@ public class ImageBrowser {
 	}
 
 
-	public void createEvent(ImgEvent event) {
+	public List<ImgPerson> getPersons() {
+	
 		try {
-			sqlInterface.createEvent(event);
-		} catch (SQLException e) {
-			log.error(e.getMessage(), e);
-		}
-	}
-
-
-	public List<ImgTag> getTags() {
-
-		try {
-			return sqlInterface.getTags();
+			return sqlInterface.getPersons();
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
 			return null;
 		}
+	}
+
+
+	public void createPerson(ImgPerson person) {
+		try {
+			sqlInterface.createPerson(person);
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+	
+	
+	public void createGroup(ImgGroup group) {
+		
+		try {
+			sqlInterface.createGroup(group);
+		} catch (SQLException e) {
+			log.error(e.getMessage(), e);
+		}
+		
 	}
 
 
@@ -147,17 +180,6 @@ public class ImageBrowser {
 
 		try {
 			return sqlInterface.getGroups();
-		} catch (SQLException e) {
-			log.error(e.getMessage(), e);
-			return null;
-		}
-	}
-
-
-	public List<ImgPerson> getPersons() {
-
-		try {
-			return sqlInterface.getPersons();
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
 			return null;
@@ -208,6 +230,16 @@ public class ImageBrowser {
 
 
 	// SQL SELECT BUILDER =====================================================
+	
+	public void setEvent(String event) {
+		selectBuilder.setEvent(event);
+	}
+
+
+	public void clearEvent() {
+		selectBuilder.clearEvent();
+	}
+
 
 	public void setTags(List<ImgTag> tags) {
 		selectBuilder.setTags(tags);
@@ -216,11 +248,6 @@ public class ImageBrowser {
 
 	public void setPersons(List<ImgPerson> persons) {
 		selectBuilder.setPersons(persons);
-	}
-
-
-	public void clearGroup() {
-		selectBuilder.clearGroup();
 	}
 
 
@@ -234,13 +261,8 @@ public class ImageBrowser {
 	}
 
 
-	public void setEvent(String event) {
-		selectBuilder.setEvent(event);
-	}
-
-
-	public void clearEvent() {
-		selectBuilder.clearEvent();
+	public void clearGroup() {
+		selectBuilder.clearGroup();
 	}
 
 
