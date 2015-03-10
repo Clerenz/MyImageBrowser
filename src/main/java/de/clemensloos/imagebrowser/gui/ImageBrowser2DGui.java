@@ -1021,25 +1021,21 @@ public class ImageBrowser2DGui implements ImageBrowserGui, ActionListener {
 		Point myLocation = new Point(location);
 
 		if (!isLocationInScreenBounds(myLocation)) {
-			System.out.println(myLocation.toString());
 			return false;
 		}
 
 		myLocation.translate(size.x - 1, 0);
 		if (!isLocationInScreenBounds(myLocation)) {
-			System.out.println(myLocation.toString());
 			return false;
 		}
 
 		myLocation.translate(0, size.y - 1);
 		if (!isLocationInScreenBounds(myLocation)) {
-			System.out.println(myLocation.toString());
 			return false;
 		}
 
 		myLocation.translate(-(size.x - 1), 0);
 		if (!isLocationInScreenBounds(myLocation)) {
-			System.out.println(myLocation.toString());
 			return false;
 		}
 
